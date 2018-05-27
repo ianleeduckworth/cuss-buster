@@ -25,7 +25,7 @@ namespace CussBuster.Controllers
 
 				return Ok(_mainHelper.FindMatches(text));
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				return BadRequest();
 			}
