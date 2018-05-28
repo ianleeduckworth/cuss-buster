@@ -15,6 +15,7 @@ namespace CussBuster.Test
     {
 		private Mock<IWordLoader> _wordLoader;
 		private Mock<IAuthChecker> _authChecker;
+		private Mock<IAuditWriter> _auditWriter;
 		private MainHelper _mainHelper;
 
 		[SetUp]
@@ -22,8 +23,9 @@ namespace CussBuster.Test
 		{
 			_wordLoader = new Mock<IWordLoader>();
 			_authChecker = new Mock<IAuthChecker>();
+			_auditWriter = new Mock<IAuditWriter>();
 
-			_mainHelper = new MainHelper(_wordLoader.Object, _authChecker.Object);
+			_mainHelper = new MainHelper(_wordLoader.Object, _authChecker.Object, _auditWriter.Object);
 		}
 
 		[Test]

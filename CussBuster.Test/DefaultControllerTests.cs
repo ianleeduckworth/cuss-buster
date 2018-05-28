@@ -88,5 +88,15 @@ namespace CussBuster.Test
 			Assert.True(value.WordType == "Vulgarity");
 			Assert.True(value.WordTypeId == 1);
 		}
+
+		[Test]
+		public void Get_Default()
+		{
+			//arrange /act
+			var result = _defaultController.Default() as OkResult;
+
+			//assert
+			Assert.True(result != null);
+		}
     }
 }
