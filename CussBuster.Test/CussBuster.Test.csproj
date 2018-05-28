@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CussBuster.Core\CussBuster.Core.csproj" />
+    <ProjectReference Include="..\CussBuster\CussBuster.csproj" />
   </ItemGroup>
 
 </Project>
