@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CussBuster", "CussBuster\Cu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CussBuster.Core", "CussBuster.Core\CussBuster.Core.csproj", "{DE92AF03-6058-4CAC-A400-80B02307EC68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CussBuster.Test", "CussBuster.Test\CussBuster.Test.csproj", "{CFA763FD-EF3C-4893-B3CF-43AB587F3AE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{DE92AF03-6058-4CAC-A400-80B02307EC68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE92AF03-6058-4CAC-A400-80B02307EC68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE92AF03-6058-4CAC-A400-80B02307EC68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFA763FD-EF3C-4893-B3CF-43AB587F3AE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA763FD-EF3C-4893-B3CF-43AB587F3AE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA763FD-EF3C-4893-B3CF-43AB587F3AE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA763FD-EF3C-4893-B3CF-43AB587F3AE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
