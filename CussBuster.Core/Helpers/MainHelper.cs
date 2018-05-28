@@ -14,11 +14,13 @@ namespace CussBuster.Core.Helpers
     {
 		private readonly IWordLoader _wordLoader;
 		private readonly IAuthChecker _authChecker;
+		private readonly IAuditWriter _auditWriter;
 
-		public MainHelper(IWordLoader wordLoader, IAuthChecker authChecker)
+		public MainHelper(IWordLoader wordLoader, IAuthChecker authChecker, IAuditWriter auditWriter)
 		{
 			_wordLoader = wordLoader;
 			_authChecker = authChecker;
+			_auditWriter = auditWriter;
 		}
 
 		public IEnumerable<ReturnModel> FindMatches(string text)
@@ -46,6 +48,7 @@ namespace CussBuster.Core.Helpers
 
 				if (match != null)
 				{
+					_auditWriter.WriteToAudit(match.WordId);
 					if (matches.Select(x => x.Word).Any(x => x.Equals(word, StringComparison.CurrentCultureIgnoreCase)))
 					{
 						var item = matches.Single(x => x.Word.Equals(word, StringComparison.CurrentCultureIgnoreCase));
