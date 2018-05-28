@@ -30,5 +30,12 @@ namespace CussBuster.Controllers
 				return BadRequest();
 			}
 		}
+
+		[HttpGet]
+		[Route("")]
+		public IActionResult Default()
+		{
+			return Ok();
+		}
 	}
 }
