@@ -19,7 +19,7 @@ namespace CusBuster.Core.DataAccess
 		{
 			return _context.Word.Select(x => new WordModel
 			{
-				Word = x.Word1,
+				Word = x.BadWord,
 				WordTypeId = x.WordTypeId,
 				Severity = x.Severity,
 				SearchTypeId = x.SearchTypeId

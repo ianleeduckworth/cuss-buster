@@ -50,7 +50,7 @@ namespace CussBuster.Core.Data.Entities
             {
                 entity.ToTable("Word", "core");
 
-                entity.HasIndex(e => e.Word1)
+                entity.HasIndex(e => e.BadWord)
                     .HasName("AK_Word_Word")
                     .IsUnique();
 
@@ -73,9 +73,9 @@ namespace CussBuster.Core.Data.Entities
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Word1)
+                entity.Property(e => e.BadWord)
                     .IsRequired()
-                    .HasColumnName("Word")
+                    .HasColumnName("BadWord")
                     .HasMaxLength(200)
                     .IsUnicode(false);
 

@@ -5,7 +5,7 @@ namespace CussBuster.Core.Data.Entities
 	public partial class Word
     {
         public int WordId { get; set; }
-        public string Word1 { get; set; }
+        public string BadWord { get; set; }
         public byte WordTypeId { get; set; }
         public byte Severity { get; set; }
         public string CreatedBy { get; set; }
