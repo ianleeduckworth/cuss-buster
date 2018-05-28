@@ -2,6 +2,7 @@
 using Autofac.Extensions.DependencyInjection;
 using CusBuster.Core.DataAccess;
 using CussBuster.Controllers;
+using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using Microsoft.AspNetCore.Builder;
@@ -41,6 +42,8 @@ namespace CussBuster
 			builder.RegisterType<MainHelper>().As<IMainHelper>().InstancePerLifetimeScope();
 			builder.RegisterType<WordLoader>().As<IWordLoader>().InstancePerLifetimeScope();
 			builder.RegisterType<AuthChecker>().As<IAuthChecker>().InstancePerLifetimeScope();
+
+			builder.RegisterType<CussBusterContext>().InstancePerLifetimeScope();
 		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
