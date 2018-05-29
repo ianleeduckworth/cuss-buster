@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CussBuster.Core.Data.Entities
 {
-	public partial class Word
+    public partial class Word
     {
         public int WordId { get; set; }
         public string BadWord { get; set; }

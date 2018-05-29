@@ -1,4 +1,5 @@
 ﻿using CusBuster.Core.DataAccess;
+using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
@@ -46,8 +47,10 @@ namespace CussBuster.Test
 				}
 			});
 
+			User user = new User();
+
 			//act
-			var result = _mainHelper.FindMatches("this is a test");
+			var result = _mainHelper.FindMatches("this is a test", user);
 
 			//assert
 			var item = result.First();
@@ -74,8 +77,10 @@ namespace CussBuster.Test
 				}
 			});
 
+			User user = new User();
+
 			//act
-			var result = _mainHelper.FindMatches("this is a TEST");
+			var result = _mainHelper.FindMatches("this is a TEST", user);
 
 			//assert
 			var item = result.First();
@@ -102,8 +107,10 @@ namespace CussBuster.Test
 				}
 			});
 
+			User user = new User();
+
 			//act
-			var result = _mainHelper.FindMatches("we are testing");
+			var result = _mainHelper.FindMatches("we are testing", user);
 
 			//assert
 			Assert.True(result.Count() == 0);
@@ -124,8 +131,10 @@ namespace CussBuster.Test
 				}
 			});
 
+			User user = new User();
+
 			//act
-			var result = _mainHelper.FindMatches("we are testing");
+			var result = _mainHelper.FindMatches("we are testing", user);
 
 			//assert
 			var item = result.First();
@@ -152,8 +161,10 @@ namespace CussBuster.Test
 				}
 			});
 
+			User user = new User();
+
 			//act
-			var result = _mainHelper.FindMatches("this is a test test");
+			var result = _mainHelper.FindMatches("this is a test test", user);
 
 			//assert
 			var item = result.First();
@@ -180,8 +191,10 @@ namespace CussBuster.Test
 				}
 			});
 
+			User user = new User();
+
 			//act
-			var result = _mainHelper.FindMatches("this is a foo");
+			var result = _mainHelper.FindMatches("this is a foo", user);
 
 			//assert
 			Assert.True(result.Count() == 0);
@@ -194,7 +207,7 @@ namespace CussBuster.Test
 			var result = _mainHelper.CheckAuthorization("test");
 
 			//assert
-			Assert.True(result == false);
+			Assert.True(result == null);
 		}
 
 		[Test]
@@ -204,29 +217,35 @@ namespace CussBuster.Test
 			var guid = new Guid(guidString);
 
 			//arrange
-			_authChecker.Setup(x => x.CheckToken(guid)).Returns(false);
+			_authChecker.Setup(x => x.CheckToken(guid)).Returns(default(User));
 
 			//act
 			var result = _mainHelper.CheckAuthorization(guidString);
 
 			//assert
-			Assert.True(result == false);
+			Assert.True(result == null);
 		}
 
 		[Test]
 		public void CheckAuthorization_ExistingGuid()
 		{
 			const string guidString = "ab9767dd-3c56-4750-a669-76564e057f83";
+			const int userId = 1;
+
 			Guid guid = new Guid(guidString);
+			User user = new User
+			{
+				UserId = userId,
+			};
 
 			//arrange
-			_authChecker.Setup(x => x.CheckToken(guid)).Returns(true);
+			_authChecker.Setup(x => x.CheckToken(guid)).Returns(user);
 
 			//act
 			var result = _mainHelper.CheckAuthorization(guidString);
 
 			//assert
-			Assert.True(result == true);
+			Assert.True(result.UserId == userId);
 		}
 
 		[Test]
@@ -266,6 +285,19 @@ namespace CussBuster.Test
 
 			//assert
 			Assert.True(result == false);
+		}
+
+		[Test]
+		public void FindMatches_VerifyAuditCalled()
+		{
+			//arrange
+			var user = new User();
+
+			//act
+			_mainHelper.FindMatches("test text", user);
+
+			//assert
+			_auditWriter.Verify(x => x.LogUserCall(user));
 		}
 	}
 }

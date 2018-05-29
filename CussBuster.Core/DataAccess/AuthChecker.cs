@@ -1,17 +1,23 @@
-﻿using System;
+﻿using CussBuster.Core.Data.Entities;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CussBuster.Core.DataAccess
 {
 	public class AuthChecker : IAuthChecker
 	{
-		public bool CheckToken(Guid token)
-		{
-			if (token != new Guid("36bed969-d86a-41ba-a289-e79183a65268"))
-				return false;
+		private readonly CussBusterContext _context;
 
-			return true;
+		public AuthChecker(CussBusterContext context)
+		{
+			_context = context;
+		}
+
+		public User CheckToken(Guid token)
+		{
+			return _context.User.FirstOrDefault(x => x.ApiToken == token);
 		}
 	}
 }

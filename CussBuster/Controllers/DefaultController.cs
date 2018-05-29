@@ -26,10 +26,12 @@ namespace CussBuster.Controllers
 				if (!_mainHelper.CheckCharacterLimit(text))
 					return BadRequest($"Text passed in is longer than the {_appSettings.CharacterLimit} character limit.  Text length: {text.Length}.");
 
-				if (!_mainHelper.CheckAuthorization(authToken))
+				var user = _mainHelper.CheckAuthorization(authToken);
+
+				if (user == null)
 					return Unauthorized();
 
-				return Ok(_mainHelper.FindMatches(text));
+				return Ok(_mainHelper.FindMatches(text, user));
 			}
 			catch (Exception)
 			{

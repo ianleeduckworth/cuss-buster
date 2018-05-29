@@ -1,4 +1,5 @@
 ﻿using CussBuster.Controllers;
+using CussBuster.Core.Data.Entities;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
 using CussBuster.Core.Settings;
@@ -34,7 +35,7 @@ namespace CussBuster.Test
 			const string text = "test text";
 
 			//arrange
-			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(false);
+			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(default(User));
 			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 
 			//act
@@ -66,11 +67,12 @@ namespace CussBuster.Test
 		{
 			const string authToken = "testAuthToken";
 			const string text = "test text";
+			User user = new User();
 
 			//arrange
-			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(true);
+			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(user);
 			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
-			_mainHelper.Setup(x => x.FindMatches(text)).Returns(new List<ReturnModel>
+			_mainHelper.Setup(x => x.FindMatches(text, user)).Returns(new List<ReturnModel>
 			{
 				new ReturnModel
 				{

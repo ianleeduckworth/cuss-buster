@@ -1,5 +1,6 @@
 ﻿using CusBuster.Core.DataAccess;
 using CussBuster.Core.Data;
+using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.ExtensionMethods;
 using CussBuster.Core.Models;
@@ -26,8 +27,10 @@ namespace CussBuster.Core.Helpers
 			_appSettings = appSettings;
 		}
 
-		public IEnumerable<ReturnModel> FindMatches(string text)
+		public IEnumerable<ReturnModel> FindMatches(string text, User user)
 		{
+			_auditWriter.LogUserCall(user);
+
 			var dataset = _wordLoader.Load();
 
 			var matches = new List<ReturnModel>();
@@ -72,10 +75,10 @@ namespace CussBuster.Core.Helpers
 			return matches;
 		}
 
-		public bool CheckAuthorization(string authToken)
+		public User CheckAuthorization(string authToken)
 		{
 			if (!Guid.TryParse(authToken, out Guid guidAuthToken))
-				return false;
+				return null;
 
 			return _authChecker.CheckToken(guidAuthToken);
 		}
