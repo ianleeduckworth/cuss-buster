@@ -3,6 +3,7 @@ using CussBuster.Core.Data;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.ExtensionMethods;
 using CussBuster.Core.Models;
+using CussBuster.Core.Settings;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,12 +16,14 @@ namespace CussBuster.Core.Helpers
 		private readonly IWordLoader _wordLoader;
 		private readonly IAuthChecker _authChecker;
 		private readonly IAuditWriter _auditWriter;
+		private readonly IAppSettings _appSettings;
 
-		public MainHelper(IWordLoader wordLoader, IAuthChecker authChecker, IAuditWriter auditWriter)
+		public MainHelper(IWordLoader wordLoader, IAuthChecker authChecker, IAuditWriter auditWriter, IAppSettings appSettings)
 		{
 			_wordLoader = wordLoader;
 			_authChecker = authChecker;
 			_auditWriter = auditWriter;
+			_appSettings = appSettings;
 		}
 
 		public IEnumerable<ReturnModel> FindMatches(string text)
@@ -75,6 +78,14 @@ namespace CussBuster.Core.Helpers
 				return false;
 
 			return _authChecker.CheckToken(guidAuthToken);
+		}
+
+		public bool CheckCharacterLimit(string text)
+		{
+			if (text.Length > _appSettings.CharacterLimit)
+				return false;
+
+			return true;
 		}
 	}
 }

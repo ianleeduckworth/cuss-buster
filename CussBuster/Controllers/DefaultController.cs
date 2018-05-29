@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using CussBuster.Core.Helpers;
+using CussBuster.Core.Settings;
 
 namespace CussBuster.Controllers
 {
@@ -8,10 +9,12 @@ namespace CussBuster.Controllers
 	public class DefaultController : Controller
 	{
 		private readonly IMainHelper _mainHelper;
+		private readonly IAppSettings _appSettings;
 
-		public DefaultController(IMainHelper mainHelper)
+		public DefaultController(IMainHelper mainHelper, IAppSettings appSettings)
 		{
 			_mainHelper = mainHelper;
+			_appSettings = appSettings;
 		}
 
 		[HttpPost]
@@ -20,6 +23,9 @@ namespace CussBuster.Controllers
 		{
 			try
 			{
+				if (!_mainHelper.CheckCharacterLimit(text))
+					return BadRequest($"Text passed in is longer than the {_appSettings.CharacterLimit} character limit.  Text length: {text.Length}.");
+
 				if (!_mainHelper.CheckAuthorization(authToken))
 					return Unauthorized();
 

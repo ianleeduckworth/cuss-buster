@@ -7,5 +7,6 @@ namespace CussBuster.Core.Helpers
 	{
 		IEnumerable<ReturnModel> FindMatches(string text);
 		bool CheckAuthorization(string authToken);
+		bool CheckCharacterLimit(string text);
 	}
 }

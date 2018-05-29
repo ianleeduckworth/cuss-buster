@@ -2,6 +2,7 @@
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
+using CussBuster.Core.Settings;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -16,6 +17,7 @@ namespace CussBuster.Test
 		private Mock<IWordLoader> _wordLoader;
 		private Mock<IAuthChecker> _authChecker;
 		private Mock<IAuditWriter> _auditWriter;
+		private Mock<IAppSettings> _appSettings;
 		private MainHelper _mainHelper;
 
 		[SetUp]
@@ -24,8 +26,9 @@ namespace CussBuster.Test
 			_wordLoader = new Mock<IWordLoader>();
 			_authChecker = new Mock<IAuthChecker>();
 			_auditWriter = new Mock<IAuditWriter>();
+			_appSettings = new Mock<IAppSettings>();
 
-			_mainHelper = new MainHelper(_wordLoader.Object, _authChecker.Object, _auditWriter.Object);
+			_mainHelper = new MainHelper(_wordLoader.Object, _authChecker.Object, _auditWriter.Object, _appSettings.Object);
 		}
 
 		[Test]
@@ -213,8 +216,8 @@ namespace CussBuster.Test
 		[Test]
 		public void CheckAuthorization_ExistingGuid()
 		{
-			var guidString = "ab9767dd-3c56-4750-a669-76564e057f83";
-			var guid = new Guid(guidString);
+			const string guidString = "ab9767dd-3c56-4750-a669-76564e057f83";
+			Guid guid = new Guid(guidString);
 
 			//arrange
 			_authChecker.Setup(x => x.CheckToken(guid)).Returns(true);
@@ -224,6 +227,45 @@ namespace CussBuster.Test
 
 			//assert
 			Assert.True(result == true);
+		}
+
+		[Test]
+		public void CheckCharacterLimit_UnderLimit()
+		{
+			//arrange
+			_appSettings.Setup(x => x.CharacterLimit).Returns(5);
+
+			//act
+			var result = _mainHelper.CheckCharacterLimit("abcd");
+
+			//assert
+			Assert.True(result == true);
+		}
+
+		[Test]
+		public void CheckCharacterLimit_AtLimit()
+		{
+			//arrange
+			_appSettings.Setup(x => x.CharacterLimit).Returns(5);
+
+			//act
+			var result = _mainHelper.CheckCharacterLimit("abcde");
+
+			//assert
+			Assert.True(result == true);
+		}
+
+		[Test]
+		public void CheckCharacterLimit_OverLimit()
+		{
+			//arrange
+			_appSettings.Setup(x => x.CharacterLimit).Returns(5);
+
+			//act
+			var result = _mainHelper.CheckCharacterLimit("abcdef");
+
+			//assert
+			Assert.True(result == false);
 		}
 	}
 }

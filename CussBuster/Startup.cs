@@ -5,6 +5,7 @@ using CussBuster.Controllers;
 using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
+using CussBuster.Core.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -43,6 +44,11 @@ namespace CussBuster
 			builder.RegisterType<WordLoader>().As<IWordLoader>().InstancePerLifetimeScope();
 			builder.RegisterType<AuthChecker>().As<IAuthChecker>().InstancePerLifetimeScope();
 			builder.RegisterType<AuditWriter>().As<IAuditWriter>().InstancePerLifetimeScope();
+
+			builder.Register(x => new AppSettings
+			{
+				CharacterLimit = int.Parse(Configuration.GetSection("AppSettings")["CharacterLimit"])
+			}).As<IAppSettings>(); ;
 
 			builder.RegisterType<CussBusterContext>().InstancePerLifetimeScope();
 		}

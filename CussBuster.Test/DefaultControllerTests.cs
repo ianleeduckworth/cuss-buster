@@ -1,6 +1,7 @@
 ﻿using CussBuster.Controllers;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
+using CussBuster.Core.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
@@ -14,26 +15,30 @@ namespace CussBuster.Test
     public class DefaultControllerTests
     {
 		private DefaultController _defaultController;
+		private Mock<IAppSettings> _appSettings;
 		private Mock<IMainHelper> _mainHelper;
 
 		[SetUp]
 		public void SetUp()
 		{
 			_mainHelper = new Mock<IMainHelper>();
+			_appSettings = new Mock<IAppSettings>();
 
-			_defaultController = new DefaultController(_mainHelper.Object);
+			_defaultController = new DefaultController(_mainHelper.Object, _appSettings.Object);
 		}
 
 		[Test]
 		public void Post_BadAuthentication()
 		{
 			const string authToken = "testAuthToken";
+			const string text = "test text";
 
 			//arrange
 			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(false);
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 
 			//act
-			var result = _defaultController.Post("test text", authToken) as UnauthorizedResult;
+			var result = _defaultController.Post(text, authToken) as UnauthorizedResult;
 
 			//assert
 			Assert.True(result != null);
@@ -43,12 +48,14 @@ namespace CussBuster.Test
 		public void Post_BadRequest()
 		{
 			const string authToken = "testAuthToken";
+			const string text = "test text";
 
 			//arrange
 			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Throws(new Exception("test exception"));
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 
 			//act
-			var result = _defaultController.Post("test text", authToken) as BadRequestResult;
+			var result = _defaultController.Post(text, authToken) as BadRequestResult;
 
 			//assert
 			Assert.True(result != null);
@@ -62,6 +69,7 @@ namespace CussBuster.Test
 
 			//arrange
 			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(true);
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 			_mainHelper.Setup(x => x.FindMatches(text)).Returns(new List<ReturnModel>
 			{
 				new ReturnModel
@@ -97,6 +105,24 @@ namespace CussBuster.Test
 
 			//assert
 			Assert.True(result != null);
+		}
+
+		[Test]
+		public void Post_OverCharacterLimit()
+		{
+			const string text = "test text";
+			const int characterLimit = 5;
+
+			//arrange
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(false);
+			_appSettings.SetupGet(x => x.CharacterLimit).Returns(characterLimit);
+
+			//act
+			var result = _defaultController.Post(text, string.Empty) as BadRequestObjectResult;
+
+			//assert
+			Assert.True(result != null);
+			Assert.True(result.Value.ToString() == $"Text passed in is longer than the {characterLimit} character limit.  Text length: {text.Length}.");
 		}
     }
 }
