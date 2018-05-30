@@ -59,7 +59,7 @@ namespace CussBuster
 			builder.Register(x => new AppSettings
 			{
 				CharacterLimit = int.Parse(Configuration.GetSection("AppSettings")["CharacterLimit"])
-			}).As<IAppSettings>();
+			}).As<IAppSettings>().SingleInstance();
 
 			builder.Register(c => new BadWordCache
 			{
