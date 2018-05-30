@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CussBuster.Core.Data
+namespace CussBuster.Core.Data.Static
 {
     public static class StaticData
     {

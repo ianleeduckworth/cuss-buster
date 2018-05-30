@@ -37,6 +37,17 @@ namespace CussBuster
 			return new AutofacServiceProvider(this.ApplicationContainer);
 		}
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+			if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseMvc();
+        }
+
 		private void RegisterDependencies(ContainerBuilder builder)
 		{
 			builder.RegisterType<DefaultController>().InstancePerLifetimeScope();
@@ -48,20 +59,14 @@ namespace CussBuster
 			builder.Register(x => new AppSettings
 			{
 				CharacterLimit = int.Parse(Configuration.GetSection("AppSettings")["CharacterLimit"])
-			}).As<IAppSettings>(); ;
+			}).As<IAppSettings>();
+
+			builder.Register(c => new BadWordCache
+			{
+				Words = c.Resolve<IWordLoader>().Load()
+			}).As<IBadWordCache>().SingleInstance();
 
 			builder.RegisterType<CussBusterContext>().InstancePerLifetimeScope();
 		}
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-			if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseMvc();
-        }
-    }
+	}
 }

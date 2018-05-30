@@ -1,6 +1,5 @@
-﻿using CusBuster.Core.DataAccess;
-using CussBuster.Core.Data;
-using CussBuster.Core.Data.Entities;
+﻿using CussBuster.Core.Data.Entities;
+using CussBuster.Core.Data.Static;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.ExtensionMethods;
 using CussBuster.Core.Models;
@@ -14,24 +13,22 @@ namespace CussBuster.Core.Helpers
 {
 	public class MainHelper : IMainHelper
     {
-		private readonly IWordLoader _wordLoader;
 		private readonly IAuthChecker _authChecker;
 		private readonly IAuditWriter _auditWriter;
 		private readonly IAppSettings _appSettings;
+		private readonly IBadWordCache _badWordCache;
 
-		public MainHelper(IWordLoader wordLoader, IAuthChecker authChecker, IAuditWriter auditWriter, IAppSettings appSettings)
+		public MainHelper(IBadWordCache badWordCache, IAuthChecker authChecker, IAuditWriter auditWriter, IAppSettings appSettings)
 		{
-			_wordLoader = wordLoader;
 			_authChecker = authChecker;
 			_auditWriter = auditWriter;
 			_appSettings = appSettings;
+			_badWordCache = badWordCache;
 		}
 
 		public IEnumerable<ReturnModel> FindMatches(string text, User user)
 		{
 			_auditWriter.LogUserCall(user);
-
-			var dataset = _wordLoader.Load();
 
 			var matches = new List<ReturnModel>();
 
@@ -39,7 +36,7 @@ namespace CussBuster.Core.Helpers
 			{
 				var word = w.RemovePunctuationAndSymbols();
 
-				var match = dataset.FirstOrDefault(x =>
+				var match = _badWordCache.Words.FirstOrDefault(x =>
 				{
 					switch (x.SearchTypeId)
 					{

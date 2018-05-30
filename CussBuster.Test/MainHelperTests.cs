@@ -1,5 +1,4 @@
-﻿using CusBuster.Core.DataAccess;
-using CussBuster.Core.Data.Entities;
+﻿using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
@@ -15,7 +14,7 @@ namespace CussBuster.Test
 	[TestFixture]
     public class MainHelperTests
     {
-		private Mock<IWordLoader> _wordLoader;
+		private Mock<IBadWordCache> _badWordCache;
 		private Mock<IAuthChecker> _authChecker;
 		private Mock<IAuditWriter> _auditWriter;
 		private Mock<IAppSettings> _appSettings;
@@ -24,19 +23,19 @@ namespace CussBuster.Test
 		[SetUp]
 		public void SetUp()
 		{
-			_wordLoader = new Mock<IWordLoader>();
+			_badWordCache = new Mock<IBadWordCache>();
 			_authChecker = new Mock<IAuthChecker>();
 			_auditWriter = new Mock<IAuditWriter>();
 			_appSettings = new Mock<IAppSettings>();
 
-			_mainHelper = new MainHelper(_wordLoader.Object, _authChecker.Object, _auditWriter.Object, _appSettings.Object);
+			_mainHelper = new MainHelper(_badWordCache.Object, _authChecker.Object, _auditWriter.Object, _appSettings.Object);
 		}
 
 		[Test]
 		public void FindMatches_SingleMatch()
 		{
 			//arrange
-			_wordLoader.Setup(x => x.Load()).Returns(new List<WordModel>
+			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
@@ -66,7 +65,7 @@ namespace CussBuster.Test
 		public void FindMatches_SingleMatch_CaseMismatch()
 		{
 			//arrange
-			_wordLoader.Setup(x => x.Load()).Returns(new List<WordModel>
+			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
@@ -96,7 +95,7 @@ namespace CussBuster.Test
 		public void FindMatches_SingleMatch_EqualsSearch_Negative()
 		{
 			//arrange
-			_wordLoader.Setup(x => x.Load()).Returns(new List<WordModel>
+			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
@@ -120,7 +119,7 @@ namespace CussBuster.Test
 		public void FindMatches_SingleMatch_ContainsSearch()
 		{
 			//arrange
-			_wordLoader.Setup(x => x.Load()).Returns(new List<WordModel>
+			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
@@ -150,7 +149,7 @@ namespace CussBuster.Test
 		public void FindMatches_SingleMatch_MultipleOccurances()
 		{
 			//arrange
-			_wordLoader.Setup(x => x.Load()).Returns(new List<WordModel>
+			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
@@ -180,7 +179,7 @@ namespace CussBuster.Test
 		public void FindMatches_NoMatches()
 		{
 			//arrange
-			_wordLoader.Setup(x => x.Load()).Returns(new List<WordModel>
+			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
