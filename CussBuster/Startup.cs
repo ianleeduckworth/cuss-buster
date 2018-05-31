@@ -6,11 +6,17 @@ using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Settings;
+using log4net;
+using log4net.Config;
+using log4net.Repository.Hierarchy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
+using System.Reflection;
+using System.Xml;
 
 namespace CussBuster
 {
@@ -27,6 +33,12 @@ namespace CussBuster
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+			//configure log4net
+			XmlDocument log4netConfig = new XmlDocument();
+			log4netConfig.Load(File.OpenRead("log4net.config"));
+			var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
+			XmlConfigurator.Configure(repo, log4netConfig["log4net"]);
+
 			services.AddMvc();
 
 			var builder = new ContainerBuilder();
