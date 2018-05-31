@@ -1,11 +1,14 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 namespace CussBuster.Core.Data.Entities
 {
     public partial class CussBusterContext : DbContext
     {
+		private IConfiguration _configuration;
+
         public virtual DbSet<CallLog> CallLog { get; set; }
         public virtual DbSet<SearchType> SearchType { get; set; }
         public virtual DbSet<User> User { get; set; }
@@ -13,11 +16,16 @@ namespace CussBuster.Core.Data.Entities
         public virtual DbSet<WordAudit> WordAudit { get; set; }
         public virtual DbSet<WordType> WordType { get; set; }
 
+		public CussBusterContext(IConfiguration configuration)
+		{
+			_configuration = configuration;
+		}
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS01;Database=CussBuster;Trusted_Connection=True;");
+				optionsBuilder.UseSqlServer(_configuration.GetConnectionString("CussBusterDatabase"));
             }
         }
 
