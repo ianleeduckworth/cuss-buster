@@ -18,6 +18,7 @@ namespace CussBuster.Test
 		private Mock<IAuthChecker> _authChecker;
 		private Mock<IAuditWriter> _auditWriter;
 		private Mock<IAppSettings> _appSettings;
+		private Mock<IUserManager> _userManager;
 		private MainHelper _mainHelper;
 
 		[SetUp]
@@ -27,8 +28,9 @@ namespace CussBuster.Test
 			_authChecker = new Mock<IAuthChecker>();
 			_auditWriter = new Mock<IAuditWriter>();
 			_appSettings = new Mock<IAppSettings>();
+			_userManager = new Mock<IUserManager>();
 
-			_mainHelper = new MainHelper(_badWordCache.Object, _authChecker.Object, _auditWriter.Object, _appSettings.Object);
+			_mainHelper = new MainHelper(_badWordCache.Object, _authChecker.Object, _auditWriter.Object, _appSettings.Object, _userManager.Object);
 		}
 
 		[Test]

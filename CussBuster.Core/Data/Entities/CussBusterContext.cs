@@ -9,7 +9,7 @@ namespace CussBuster.Core.Data.Entities
     {
 		private readonly IConfiguration _configuration;
 
-        public virtual DbSet<CallLog> CallLog { get; set; }
+		public virtual DbSet<CallLog> CallLog { get; set; }
         public virtual DbSet<SearchType> SearchType { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<Word> Word { get; set; }
@@ -75,6 +75,8 @@ namespace CussBuster.Core.Data.Entities
             {
                 entity.ToTable("User", "usr");
 
+                entity.Property(e => e.CallsPerMonth).HasDefaultValueSql("((250))");
+
                 entity.Property(e => e.CanCallApi).HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.CreatedBy)
@@ -93,6 +95,10 @@ namespace CussBuster.Core.Data.Entities
                     .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.PricePerMonth)
+                    .HasColumnType("smallmoney")
+                    .HasDefaultValueSql("((0))");
 
                 entity.Property(e => e.UpdatedBy)
                     .IsRequired()
