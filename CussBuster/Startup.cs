@@ -67,6 +67,7 @@ namespace CussBuster
 			builder.RegisterType<WordLoader>().As<IWordLoader>().InstancePerLifetimeScope();
 			builder.RegisterType<AuthChecker>().As<IAuthChecker>().InstancePerLifetimeScope();
 			builder.RegisterType<AuditWriter>().As<IAuditWriter>().InstancePerLifetimeScope();
+			builder.RegisterType<UserManager>().As<IUserManager>().InstancePerLifetimeScope();
 			builder.Register(c => Configuration);
 
 			builder.Register(x => new AppSettings

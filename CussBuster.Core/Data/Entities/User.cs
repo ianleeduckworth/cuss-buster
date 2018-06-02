@@ -18,6 +18,7 @@ namespace CussBuster.Core.Data.Entities
         public DateTime CreatedDate { get; set; }
         public string UpdatedBy { get; set; }
         public string UpdatedDate { get; set; }
+        public bool CanCallApi { get; set; }
 
         public ICollection<CallLog> CallLog { get; set; }
     }

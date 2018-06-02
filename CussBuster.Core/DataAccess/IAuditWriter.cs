@@ -1,4 +1,5 @@
 ﻿using CussBuster.Core.Data.Entities;
+using System;
 
 namespace CussBuster.Core.DataAccess
 {

@@ -67,7 +67,10 @@ namespace CussBuster.Test
 		{
 			const string authToken = "testAuthToken";
 			const string text = "test text";
-			User user = new User();
+			User user = new User
+			{
+				CanCallApi = true
+			};
 
 			//arrange
 			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(user);
@@ -125,6 +128,27 @@ namespace CussBuster.Test
 			//assert
 			Assert.True(result != null);
 			Assert.True(result.Value.ToString() == $"Text passed in is longer than the {characterLimit} character limit.  Text length: {text.Length}.");
+		}
+
+		[Test]
+		public void Post_CannotCallApi()
+		{
+			const string text = "test text";
+			const string authToken = "testAuthToken";
+
+			//arrange
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
+			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(new User
+			{
+				CanCallApi = false
+			});
+
+			//act
+			var result = _defaultController.Post(text, authToken) as BadRequestObjectResult;
+
+			//assert
+			Assert.True(result != null);
+			Assert.True(result.Value.ToString() == "You have reached your call limit for the month.  Please contact support for more information");
 		}
     }
 }

@@ -7,7 +7,7 @@ namespace CussBuster.Core.Data.Entities
 {
     public partial class CussBusterContext : DbContext
     {
-		private IConfiguration _configuration;
+		private readonly IConfiguration _configuration;
 
         public virtual DbSet<CallLog> CallLog { get; set; }
         public virtual DbSet<SearchType> SearchType { get; set; }
@@ -21,15 +21,15 @@ namespace CussBuster.Core.Data.Entities
 			_configuration = configuration;
 		}
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			if (!optionsBuilder.IsConfigured)
+			{
 				optionsBuilder.UseSqlServer(_configuration.GetConnectionString("CussBusterDatabase"));
-            }
-        }
+			}
+		}
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CallLog>(entity =>
             {
@@ -74,6 +74,8 @@ namespace CussBuster.Core.Data.Entities
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User", "usr");
+
+                entity.Property(e => e.CanCallApi).HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.CreatedBy)
                     .IsRequired()

@@ -17,13 +17,15 @@ namespace CussBuster.Core.Helpers
 		private readonly IAuditWriter _auditWriter;
 		private readonly IAppSettings _appSettings;
 		private readonly IBadWordCache _badWordCache;
+		private readonly IUserManager _userManager;
 
-		public MainHelper(IBadWordCache badWordCache, IAuthChecker authChecker, IAuditWriter auditWriter, IAppSettings appSettings)
+		public MainHelper(IBadWordCache badWordCache, IAuthChecker authChecker, IAuditWriter auditWriter, IAppSettings appSettings, IUserManager userManager)
 		{
 			_authChecker = authChecker;
 			_auditWriter = auditWriter;
 			_appSettings = appSettings;
 			_badWordCache = badWordCache;
+			_userManager = userManager;
 		}
 
 		public IEnumerable<ReturnModel> FindMatches(string text, User user)
@@ -69,6 +71,7 @@ namespace CussBuster.Core.Helpers
 				}
 			}
 
+			_userManager.CheckLockAccount(user);
 			return matches;
 		}
 
@@ -86,6 +89,19 @@ namespace CussBuster.Core.Helpers
 				return false;
 
 			return true;
+		}
+
+		public bool CheckUnlockAccount(User user)
+		{
+			var now = DateTime.UtcNow;
+			var lastCall = _userManager.GetLastCallDate(user);
+			if (lastCall.Month != now.Month)
+			{
+				_userManager.UnlockAccount(user);
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

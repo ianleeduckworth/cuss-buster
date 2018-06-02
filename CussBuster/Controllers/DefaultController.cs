@@ -40,6 +40,14 @@ namespace CussBuster.Controllers
 					_logger.Error($"AuthToken: {authToken} could not be found in the database; user is unauthorized");
 					return Unauthorized();
 				}
+				else if (!user.CanCallApi)
+				{
+					if (!_mainHelper.CheckUnlockAccount(user))
+					{
+						_logger.Error($"AuthToken: {authToken} could not call API.  CanCallApi is false; check monthly limit for user");
+						return BadRequest("You have reached your call limit for the month.  Please contact support for more information");
+					}
+				}
 
 				_logger.Info($"User with AuthToken: {authToken} called API successfully");
 				return Ok(_mainHelper.FindMatches(text, user));
