@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using CussBuster.Core.Data.Entities;
+using CussBuster.Core.Models;
 
 namespace CussBuster.Core.DataAccess
 {
@@ -11,6 +12,32 @@ namespace CussBuster.Core.DataAccess
 		public UserManager(CussBusterContext context)
 		{
 			_context = context;
+		}
+
+		public Guid AddNewuser(SignupModel signupModel, StandardPricingTier tier)
+		{
+			var apiToken = Guid.NewGuid();
+
+			var user = new User
+			{
+				ApiToken = apiToken,
+				CallsPerMonth = tier.CallsPerMonth,
+				CanCallApi = true,
+				FirstName = signupModel.FirstName,
+				LastName = signupModel.LastName,
+				Email = signupModel.EmailAddress,
+				PricePerMonth = tier.PricePerMonth,
+				CreatedBy = "test",
+				CreatedDate = DateTime.UtcNow,
+				UpdatedBy = "test",
+				//UpdatedDate = DateTime.UtcNow
+				UpdatedDate = "test",
+			};
+
+			_context.User.Add(user);
+			_context.SaveChanges();
+
+			return apiToken;
 		}
 
 		public void CheckLockAccount(User user)
@@ -28,6 +55,11 @@ namespace CussBuster.Core.DataAccess
 		public DateTime GetLastCallDate(User user)
 		{
 			return _context.CallLog.Where(x => x.UserId == user.UserId).Max(x => x.EventDate);
+		}
+
+		public User GetUserByEmail(string emailAddress)
+		{
+			return _context.User.FirstOrDefault(x => x.Email == emailAddress);
 		}
 
 		public void UnlockAccount(User user)

@@ -7,14 +7,15 @@ namespace CussBuster.Core.Data.Entities
 {
     public partial class CussBusterContext : DbContext
     {
-		private readonly IConfiguration _configuration;
-
-		public virtual DbSet<CallLog> CallLog { get; set; }
+        public virtual DbSet<CallLog> CallLog { get; set; }
         public virtual DbSet<SearchType> SearchType { get; set; }
+        public virtual DbSet<StandardPricingTier> StandardPricingTier { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<Word> Word { get; set; }
         public virtual DbSet<WordAudit> WordAudit { get; set; }
         public virtual DbSet<WordType> WordType { get; set; }
+
+		private readonly IConfiguration _configuration;
 
 		public CussBusterContext(IConfiguration configuration)
 		{
@@ -71,6 +72,20 @@ namespace CussBuster.Core.Data.Entities
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<StandardPricingTier>(entity =>
+            {
+                entity.ToTable("StandardPricingTier", "static");
+
+                entity.Property(e => e.StandardPricingTierId).ValueGeneratedNever();
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PricePerMonth).HasColumnType("smallmoney");
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User", "usr");
@@ -85,6 +100,11 @@ namespace CussBuster.Core.Data.Entities
                     .IsUnicode(false);
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.FirstName)
                     .IsRequired()

@@ -18,5 +18,12 @@ namespace CussBuster.Core.Data.Static
 			RacialSlur = 2,
 			Sexism = 3,
 		}
+
+		public enum StaticPricingTier
+		{
+			Free = 1,
+			Standard = 2,
+			Premium = 3
+		}
     }
 }

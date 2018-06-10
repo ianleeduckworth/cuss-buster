@@ -21,6 +21,7 @@ namespace CussBuster.Core.Data.Entities
         public bool CanCallApi { get; set; }
         public int CallsPerMonth { get; set; }
         public decimal PricePerMonth { get; set; }
+        public string Email { get; set; }
 
         public ICollection<CallLog> CallLog { get; set; }
     }

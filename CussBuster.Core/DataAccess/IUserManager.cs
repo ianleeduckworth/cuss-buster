@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using CussBuster.Core.Data.Entities;
+using CussBuster.Core.Models;
 
 namespace CussBuster.Core.DataAccess
 {
@@ -10,5 +9,7 @@ namespace CussBuster.Core.DataAccess
 		DateTime GetLastCallDate(User user);
 		void UnlockAccount(User user);
 		void CheckLockAccount(User user);
+		User GetUserByEmail(string emailAddress);
+		Guid AddNewuser(SignupModel signupModel, StandardPricingTier pricingTier);
 	}
 }
