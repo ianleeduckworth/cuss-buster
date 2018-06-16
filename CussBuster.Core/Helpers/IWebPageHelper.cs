@@ -5,6 +5,7 @@ namespace CussBuster.Core.Helpers
 {
 	public interface IWebPageHelper
 	{
-		Guid SignUp(SignupModel signupModel);
+		Guid SignUp(UserSignupModel signupModel);
+		UserReturnModel GetUserInfo(Guid apiTokenGuid);
 	}
 }

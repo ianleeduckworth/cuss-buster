@@ -10,6 +10,7 @@ namespace CussBuster.Core.DataAccess
 		void UnlockAccount(User user);
 		void CheckLockAccount(User user);
 		User GetUserByEmail(string emailAddress);
-		Guid AddNewuser(SignupModel signupModel, StandardPricingTier pricingTier);
+		User GetUserByApiToken(Guid ApiToken);
+		Guid AddNewuser(UserSignupModel signupModel, StandardPricingTier pricingTier);
 	}
 }

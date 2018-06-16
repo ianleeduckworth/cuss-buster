@@ -40,6 +40,7 @@ namespace CussBuster
 			XmlConfigurator.Configure(repo, log4netConfig["log4net"]);
 
 			services.AddMvc();
+			services.AddCors();
 
 			var builder = new ContainerBuilder();
 			builder.Populate(services);

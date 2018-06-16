@@ -14,7 +14,7 @@ namespace CussBuster.Core.DataAccess
 			_context = context;
 		}
 
-		public Guid AddNewuser(SignupModel signupModel, StandardPricingTier tier)
+		public Guid AddNewuser(UserSignupModel signupModel, StandardPricingTier tier)
 		{
 			var apiToken = Guid.NewGuid();
 
@@ -55,6 +55,11 @@ namespace CussBuster.Core.DataAccess
 		public DateTime GetLastCallDate(User user)
 		{
 			return _context.CallLog.Where(x => x.UserId == user.UserId).Max(x => x.EventDate);
+		}
+
+		public User GetUserByApiToken(Guid apiToken)
+		{
+			return _context.User.FirstOrDefault(x => x.ApiToken == apiToken);
 		}
 
 		public User GetUserByEmail(string emailAddress)

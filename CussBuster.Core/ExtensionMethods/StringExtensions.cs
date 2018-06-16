@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
 namespace CussBuster.Core.ExtensionMethods
 {
-    public static class StringExtensions
+	public static class StringExtensions
     {
 		public static string RemovePunctuationAndSymbols(this string input)
 		{

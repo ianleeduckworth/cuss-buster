@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CussBuster.Core.Models
 {
-    public class SignupModel
+    public class UserSignupModel
     {
 		[Required]
 		[MaxLength(100)]
@@ -19,7 +19,6 @@ namespace CussBuster.Core.Models
 		[MaxLength(200)]
         public string EmailAddress { get; set; }
 
-		[Required]
 		[CreditCard]
         public string CreditCardNumber { get; set; }
 
