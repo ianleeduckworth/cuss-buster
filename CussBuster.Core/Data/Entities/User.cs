@@ -8,6 +8,7 @@ namespace CussBuster.Core.Data.Entities
         public User()
         {
             CallLog = new HashSet<CallLog>();
+            UserSetting = new HashSet<UserSetting>();
         }
 
         public int UserId { get; set; }
@@ -22,7 +23,9 @@ namespace CussBuster.Core.Data.Entities
         public int CallsPerMonth { get; set; }
         public decimal PricePerMonth { get; set; }
         public string Email { get; set; }
+        public decimal CreditCardNumber { get; set; }
 
         public ICollection<CallLog> CallLog { get; set; }
+        public ICollection<UserSetting> UserSetting { get; set; }
     }
 }

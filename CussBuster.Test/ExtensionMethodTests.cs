@@ -36,10 +36,7 @@ namespace CussBuster.Test
 		public void IsNullOrZero_NotNullOrZero()
 		{
 			//arrange
-			var list = new List<string>
-			{
-				"test"
-			};
+			var list = new List<string> { "test" };
 
 			//act
 			var result = list.IsNullOrZero();
@@ -65,7 +62,7 @@ namespace CussBuster.Test
 		public void RemovePunctuationAndSymbols_Punctuation()
 		{
 			//arrange
-			const string test = @"test!@#$%^&*()_+-={}|[]<\>?,./;':""";
+			const string test = @"~`!@#$%^&*()_+test-={}|[]<\>?,./;':""";
 			const string expectedResult = "test";
 
 			//act

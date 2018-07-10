@@ -7,15 +7,16 @@ namespace CussBuster.Core.Data.Entities
 {
     public partial class CussBusterContext : DbContext
     {
+		protected IConfiguration _configuration;
+
         public virtual DbSet<CallLog> CallLog { get; set; }
         public virtual DbSet<SearchType> SearchType { get; set; }
         public virtual DbSet<StandardPricingTier> StandardPricingTier { get; set; }
         public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<UserSetting> UserSetting { get; set; }
         public virtual DbSet<Word> Word { get; set; }
         public virtual DbSet<WordAudit> WordAudit { get; set; }
         public virtual DbSet<WordType> WordType { get; set; }
-
-		private readonly IConfiguration _configuration;
 
 		public CussBusterContext(IConfiguration configuration)
 		{
@@ -101,6 +102,8 @@ namespace CussBuster.Core.Data.Entities
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
+                entity.Property(e => e.CreditCardNumber).HasColumnType("numeric(16, 0)");
+
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(200)
@@ -129,6 +132,34 @@ namespace CussBuster.Core.Data.Entities
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<UserSetting>(entity =>
+            {
+                entity.ToTable("UserSetting", "usr");
+
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdatedBy)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.UpdatedDate)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserSetting)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_UserSetting_UserId");
             });
 
             modelBuilder.Entity<Word>(entity =>
@@ -208,6 +239,12 @@ namespace CussBuster.Core.Data.Entities
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.WordTypeNavigation)
+                    .WithOne(p => p.InverseWordTypeNavigation)
+                    .HasForeignKey<WordType>(d => d.WordTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserSetting_WordTypeId");
             });
         }
     }

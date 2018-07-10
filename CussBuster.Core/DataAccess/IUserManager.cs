@@ -11,6 +11,9 @@ namespace CussBuster.Core.DataAccess
 		void CheckLockAccount(User user);
 		User GetUserByEmail(string emailAddress);
 		User GetUserByApiToken(Guid ApiToken);
-		Guid AddNewuser(UserSignupModel signupModel, StandardPricingTier pricingTier);
+		int GetCallsThisMonth(int userId);
+		User AddNewuser(UserSignupModel signupModel, StandardPricingTier pricingTier);
+		User UpdateExistingUser(User user);
+		void SetStandardSettings(int userId);
 	}
 }

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CussBuster.Core.Models
 {
-    public class UserSignupModel
+	public class UserSignupModel
     {
 		[Required]
 		[MaxLength(100)]

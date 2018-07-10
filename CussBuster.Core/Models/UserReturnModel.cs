@@ -14,5 +14,13 @@ namespace CussBuster.Core.Models
 		public int CallsPerMonth { get; set; }
 		public decimal PricePerMonth { get; set; }
 		public string AccountType { get; set; }
-    }
+		public string CreditCardNumber { get; set; }
+		public int CallsThisMonth { get; set; }
+		public bool Racism { get; set; }
+		public byte? RacismSeverity { get; set; }
+		public bool Vulgarity { get; set; }
+		public byte? VulgaritySeverity { get; set; }
+		public bool Sexism { get; set; }
+		public byte? SexismSeverity { get; set; }
+	}
 }

@@ -11,27 +11,21 @@ namespace CussBuster.Core.Helpers
 	{
 		private readonly IUserManager _userManager;
 		private readonly IStandardPricingTierManager _standardPricingTierManager;
+		private readonly IAccountTypeHelper _accountTypeHelper;
 
-		public WebPageHelper(IUserManager userManager, IStandardPricingTierManager standardPricingTierManager)
+		public WebPageHelper(IUserManager userManager, IStandardPricingTierManager standardPricingTierManager, IAccountTypeHelper accountTypeHelper)
 		{
 			_userManager = userManager;
 			_standardPricingTierManager = standardPricingTierManager;
+			_accountTypeHelper = accountTypeHelper;
 		}
 
 		public UserReturnModel GetUserInfo(Guid apiTokenGuid)
 		{
 			var user = _userManager.GetUserByApiToken(apiTokenGuid);
 
-			string accountType;
-
-			if (user.PricePerMonth == 0 && user.CallsPerMonth == 250)
-				accountType = "Free";
-			else if (user.PricePerMonth == 25 && user.CallsPerMonth == 10000)
-				accountType = "Standard";
-			else if (user.PricePerMonth == 50 && user.CallsPerMonth == 100000)
-				accountType = "Premium";
-			else
-				accountType = "Unknown";
+			if (user == null)
+				return null;
 
 			return new UserReturnModel
 			{
@@ -39,10 +33,18 @@ namespace CussBuster.Core.Helpers
 				Email = user.Email,
 				FirstName = user.FirstName,
 				LastName = user.LastName,
-				AccountLocked = user.CanCallApi,
+				AccountLocked = !user.CanCallApi,
 				CallsPerMonth = user.CallsPerMonth,
 				PricePerMonth = user.PricePerMonth,
-				AccountType = accountType
+				AccountType = _accountTypeHelper.GetAccountTypeBasedOnPricing(user.PricePerMonth, user.CallsPerMonth),
+				CreditCardNumber = $"************{(user.CreditCardNumber % 10000).ToString().PadLeft(4, '0')}",
+				CallsThisMonth = _userManager.GetCallsThisMonth(user.UserId),
+				Racism = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur) != null ? true : false,
+				RacismSeverity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur)?.Severity,
+				Vulgarity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.Vulgarity) != null ? true : false,
+				VulgaritySeverity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.Vulgarity)?.Severity,
+				Sexism = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.Sexism) != null ? true : false,
+				SexismSeverity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.Sexism)?.Severity
 			};
 		}
 
@@ -59,7 +61,59 @@ namespace CussBuster.Core.Helpers
 			if (tier == null)
 				throw new InvalidOperationException($"Could not find AccountTypeId {signupModel.PricingTierId}");
 
-			return _userManager.AddNewuser(signupModel, tier);
+			var user = _userManager.AddNewuser(signupModel, tier);
+			_userManager.SetStandardSettings(user.UserId);
+
+			return user.ApiToken;
+		}
+
+		public UserUpdateModel UpdateUserInfo(Guid apiTokenGuid, UserUpdateModel userUpdateModel)
+		{
+			var user = _userManager.GetUserByApiToken(apiTokenGuid);
+
+			if (user == null)
+				throw new InvalidOperationException($"User could not be found where API token is {apiTokenGuid}");
+
+			user.FirstName = userUpdateModel.FirstName;
+			user.LastName = userUpdateModel.LastName;
+			user.Email = userUpdateModel.EmailAddress;
+
+			HandleUserSettings(user, (byte)StaticData.WordType.RacialSlur, userUpdateModel.Racism);
+			HandleUserSettings(user, (byte)StaticData.WordType.Sexism, userUpdateModel.Sexism);
+			HandleUserSettings(user, (byte)StaticData.WordType.Vulgarity, userUpdateModel.Vulgarity);
+
+			user.CallsPerMonth = _accountTypeHelper.GetCallsPerMonth(userUpdateModel.PricingTierId);
+			user.PricePerMonth = _accountTypeHelper.GetPricePerMonth(userUpdateModel.PricingTierId);
+
+			_userManager.UpdateExistingUser(user);
+
+			return userUpdateModel;
+		}
+
+		private void HandleUserSettings (User user, byte wordTypeId, bool propertySetting)
+		{
+			var setting = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == wordTypeId);
+			if (setting == null && propertySetting)
+			{
+				user.UserSetting.Add(new UserSetting
+				{
+					WordTypeId = wordTypeId,
+					UserId = user.UserId,
+					Severity = 10,
+					CreatedDate = DateTime.Now,
+					CreatedBy = "test",
+					UpdatedDate = "test",
+					UpdatedBy = "test"
+				});
+			}
+			else if (setting != null && propertySetting)
+			{
+				//nothing to update yet
+			}
+			else if (setting != null && !propertySetting)
+			{
+				user.UserSetting.Remove(setting);
+			}
 		}
 	}
 }

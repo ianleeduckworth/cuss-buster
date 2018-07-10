@@ -7,5 +7,6 @@ namespace CussBuster.Core.Helpers
 	{
 		Guid SignUp(UserSignupModel signupModel);
 		UserReturnModel GetUserInfo(Guid apiTokenGuid);
+		UserUpdateModel UpdateUserInfo(Guid apiTokenGuid, UserUpdateModel userSignupModel);
 	}
 }

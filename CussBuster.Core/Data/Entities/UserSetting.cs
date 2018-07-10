@@ -3,22 +3,17 @@ using System.Collections.Generic;
 
 namespace CussBuster.Core.Data.Entities
 {
-    public partial class WordType
+    public partial class UserSetting
     {
-        public WordType()
-        {
-            Word = new HashSet<Word>();
-        }
-
+        public int UserSettingId { get; set; }
+        public int UserId { get; set; }
         public byte WordTypeId { get; set; }
-        public string Name { get; set; }
+        public byte Severity { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public string UpdatedBy { get; set; }
         public string UpdatedDate { get; set; }
 
-        public WordType WordTypeNavigation { get; set; }
-        public WordType InverseWordTypeNavigation { get; set; }
-        public ICollection<Word> Word { get; set; }
+        public User User { get; set; }
     }
 }

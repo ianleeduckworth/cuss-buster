@@ -24,19 +24,34 @@ namespace CussBuster.Controllers
 			_webPageHelper = webPageHelper;
 		}
 
+		[HttpGet]
+		public IActionResult Get(string apiToken)
+		{
+			try
+			{
+				if (!Guid.TryParse(apiToken, out Guid apiTokenGuid))
+					throw new InvalidOperationException($"Could not parse API token passed in into a GUID.  API token: {apiToken}");
+
+				var result = _webPageHelper.GetUserInfo(apiTokenGuid);
+
+				if (result == null)
+					return NotFound();
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				_logger.Error($"Unhandled exception occurred when attempting to get user data", ex);
+				return StatusCode(500, ex.Message);
+			}
+		}
+
 		[HttpPost]
 		public IActionResult Post([FromBody] UserSignupModel signupModel)
 		{
 			try
 			{
-				if (!ModelState.IsValid)
-				{
-					var errors = ModelState.Select(x => x.Value.Errors).Where(y => y.Count > 0).Select(x => x[0].ErrorMessage).Aggregate((a, b) => $"{a}{Environment.NewLine}{b}");
-					throw new InvalidOperationException(errors);
-				}
-
-				if (!IsValidEmail(signupModel.EmailAddress))
-					throw new InvalidOperationException("Email address entered is invalid");
+				ValidateModel(signupModel);
 
 				var result = _webPageHelper.SignUp(signupModel);
 				return Ok(result);
@@ -48,19 +63,26 @@ namespace CussBuster.Controllers
 			}
 		}
 
-		public IActionResult Get(string apiToken)
+		[HttpPut]
+		public IActionResult Put(string apiToken, [FromBody]UserUpdateModel userUpdateModel)
 		{
 			try
 			{
-				Guid apiTokenGuid;
-				if (!Guid.TryParse(apiToken, out apiTokenGuid))
+				ValidateModel(userUpdateModel);
+
+				if (!Guid.TryParse(apiToken, out Guid apiTokenGuid))
 					throw new InvalidOperationException($"Could not parse API token passed in into a GUID.  API token: {apiToken}");
 
-				return Ok(_webPageHelper.GetUserInfo(apiTokenGuid));
+				var result = _webPageHelper.UpdateUserInfo(apiTokenGuid, userUpdateModel);
+
+				if (result == null)
+					return NotFound();
+
+				return Ok(result);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
-				_logger.Error($"Unhandled exception occurred when attempting to get user data", ex);
+				_logger.Error($"Unhandled exception occurred when attempting to update user data", ex);
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -69,6 +91,18 @@ namespace CussBuster.Controllers
 		public IActionResult Options()
 		{
 			return Ok();
+		}
+
+		private void ValidateModel<T>(T model) where T : UserSignupModel
+		{
+			if (!ModelState.IsValid)
+			{
+				var errors = ModelState.Select(x => x.Value.Errors).Where(y => y.Count > 0).Select(x => x[0].ErrorMessage).Aggregate((a, b) => $"{a}{Environment.NewLine}{b}");
+				throw new InvalidOperationException(errors);
+			}
+
+			if (!IsValidEmail(model.EmailAddress))
+				throw new InvalidOperationException("Email address entered is invalid");
 		}
 
 		private bool IsValidEmail(string email)

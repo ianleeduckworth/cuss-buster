@@ -11,5 +11,5 @@ namespace CussBuster.Core.Models
 		public string WordType { get; set; }
 		public byte Severity { get; set; }
 		public int Occurrences { get; set; }
-    }
+	}
 }
