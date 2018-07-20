@@ -37,7 +37,7 @@ namespace CussBuster.Core.Helpers
 				CallsPerMonth = user.CallsPerMonth,
 				PricePerMonth = user.PricePerMonth,
 				AccountType = _accountTypeHelper.GetAccountTypeBasedOnPricing(user.PricePerMonth, user.CallsPerMonth),
-				CreditCardNumber = $"************{(user.CreditCardNumber % 10000).ToString().PadLeft(4, '0')}",
+				CreditCardNumber = CreateFuzzifiedCreditCardNumber(user.CreditCardNumber),
 				CallsThisMonth = _userManager.GetCallsThisMonth(user.UserId),
 				Racism = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur) != null ? true : false,
 				RacismSeverity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur)?.Severity,
@@ -87,6 +87,8 @@ namespace CussBuster.Core.Helpers
 
 			_userManager.UpdateExistingUser(user);
 
+			userUpdateModel.CreditCardNumber = CreateFuzzifiedCreditCardNumber(user.CreditCardNumber);
+
 			return userUpdateModel;
 		}
 
@@ -114,6 +116,11 @@ namespace CussBuster.Core.Helpers
 			{
 				user.UserSetting.Remove(setting);
 			}
+		}
+
+		private string CreateFuzzifiedCreditCardNumber(decimal creditCardNumber)
+		{
+			return $"************{(creditCardNumber % 10000).ToString().PadLeft(4, '0')}";
 		}
 	}
 }
