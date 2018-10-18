@@ -21,6 +21,11 @@ namespace CussBuster.Controllers
 			_webPageHelper = webPageHelper;
 		}
 
+		/// <summary>
+		/// Get information about a current account
+		/// </summary>
+		/// <param name="apiToken"></param>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult Get(string apiToken)
 		{
@@ -47,6 +52,11 @@ namespace CussBuster.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Sign up for a new account
+		/// </summary>
+		/// <param name="signupModel"></param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult Post([FromBody] UserSignupModel signupModel)
 		{
@@ -71,6 +81,13 @@ namespace CussBuster.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Update an existing account
+		/// </summary>
+		/// <param name="apiToken"></param>
+		/// <param name="password"></param>
+		/// <param name="userUpdateModel"></param>
+		/// <returns></returns>
 		[HttpPut]
 		public IActionResult Put(string apiToken, string password, [FromBody]UserUpdateModel userUpdateModel)
 		{
