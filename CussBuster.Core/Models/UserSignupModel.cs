@@ -33,6 +33,7 @@ namespace CussBuster.Core.Models
 		public string CreditCardCvcCode { get; set; }
 
 		[Required]
+		[MinLength(8)]
 		public string Password { get; set; }
 	}
 }
