@@ -12,8 +12,7 @@ namespace CussBuster.Core.Data.Entities
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public string UpdatedBy { get; set; }
-        public string UpdatedDate { get; set; }
-
+        public DateTime UpdatedDate { get; set; }
         public User User { get; set; }
     }
 }

@@ -108,7 +108,7 @@ namespace CussBuster.Core.DataAccess
 					CreatedBy = userName,
 					CreatedDate = now,
 					UpdatedBy = userName,
-					UpdatedDate = "test"
+					UpdatedDate = now
 				});
 			}
 
