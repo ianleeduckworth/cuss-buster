@@ -26,13 +26,6 @@ namespace CussBuster.Controllers
 		{
 			try
 			{
-				//if (!ModelState.IsValid)
-				//{
-				//	var msg = $"Error with model passed in: '{ModelState.GetErrorsText()}'";
-				//	_logger.Error(msg);
-				//	return StatusCode((int)HttpStatusCode.BadRequest, msg);
-				//}
-
 				return Ok(_signinHelper.Signin(signinModel.EmailAddress, signinModel.Password));
 			}
 			catch (UserNotFoundException ex)
