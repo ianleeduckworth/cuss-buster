@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using CussBuster.Core.Data.Entities;
 using CussBuster.Core.Data.Static;
 using CussBuster.Core.DataAccess;
+using CussBuster.Core.Exceptions;
 using CussBuster.Core.Models;
+using CussBuster.Core.Security;
 
 namespace CussBuster.Core.Helpers
 {
@@ -12,12 +15,14 @@ namespace CussBuster.Core.Helpers
 		private readonly IUserManager _userManager;
 		private readonly IStandardPricingTierManager _standardPricingTierManager;
 		private readonly IAccountTypeHelper _accountTypeHelper;
+		private readonly IPasswordHelper _passwordHelper;
 
-		public WebPageHelper(IUserManager userManager, IStandardPricingTierManager standardPricingTierManager, IAccountTypeHelper accountTypeHelper)
+		public WebPageHelper(IUserManager userManager, IStandardPricingTierManager standardPricingTierManager, IAccountTypeHelper accountTypeHelper, IPasswordHelper passwordHelper)
 		{
 			_userManager = userManager;
 			_standardPricingTierManager = standardPricingTierManager;
 			_accountTypeHelper = accountTypeHelper;
+			_passwordHelper = passwordHelper;
 		}
 
 		public UserReturnModel GetUserInfo(Guid apiTokenGuid)
@@ -27,9 +32,14 @@ namespace CussBuster.Core.Helpers
 			if (user == null)
 				return null;
 
+			return MapUserToModel(user);
+		}
+
+		public UserReturnModel MapUserToModel(User user)
+		{
 			return new UserReturnModel
 			{
-				ApiToken = apiTokenGuid,
+				ApiToken = user.ApiToken,
 				Email = user.Email,
 				FirstName = user.FirstName,
 				LastName = user.LastName,
@@ -37,8 +47,8 @@ namespace CussBuster.Core.Helpers
 				CallsPerMonth = user.CallsPerMonth,
 				PricePerMonth = user.PricePerMonth,
 				AccountType = _accountTypeHelper.GetAccountTypeBasedOnPricing(user.PricePerMonth, user.CallsPerMonth),
-				CreditCardNumber = CreateFuzzifiedCreditCardNumber(user.CreditCardNumber),
-				CallsThisMonth = _userManager.GetCallsThisMonth(user.UserId),
+				CreditCardNumber = $"************{(user.CreditCardNumber % 10000).ToString().PadLeft(4, '0')}",
+				CallsThisMonth = user.CallLog.Count(),
 				Racism = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur) != null ? true : false,
 				RacismSeverity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur)?.Severity,
 				Vulgarity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.Vulgarity) != null ? true : false,
@@ -48,7 +58,7 @@ namespace CussBuster.Core.Helpers
 			};
 		}
 
-		public Guid SignUp(UserSignupModel signupModel)
+		public UserReturnModel SignUp(UserSignupModel signupModel, string userName)
 		{
 			if (string.IsNullOrEmpty(signupModel.CreditCardNumber) && signupModel.PricingTierId != (byte)StaticData.StaticPricingTier.Free)
 				throw new InvalidOperationException("A credit card number must be provided for any type of non-free account");
@@ -61,18 +71,21 @@ namespace CussBuster.Core.Helpers
 			if (tier == null)
 				throw new InvalidOperationException($"Could not find AccountTypeId {signupModel.PricingTierId}");
 
-			var user = _userManager.AddNewuser(signupModel, tier);
+			var user = _userManager.AddNewuser(signupModel, tier, userName);
 			_userManager.SetStandardSettings(user.UserId);
 
-			return user.ApiToken;
+			return MapUserToModel(user);
 		}
 
-		public UserUpdateModel UpdateUserInfo(Guid apiTokenGuid, UserUpdateModel userUpdateModel)
+		public UserReturnModel UpdateUserInfo(Guid apiTokenGuid, string password, UserUpdateModel userUpdateModel)
 		{
 			var user = _userManager.GetUserByApiToken(apiTokenGuid);
 
 			if (user == null)
-				throw new InvalidOperationException($"User could not be found where API token is {apiTokenGuid}");
+				throw new UserNotFoundException($"User could not be found where API token is {apiTokenGuid}");
+
+			if (!_passwordHelper.CompareSecurePasswords(Encoding.ASCII.GetBytes(password), user.Password))
+				throw new UnauthorizedAccessException("Password entered was incorrect");
 
 			user.FirstName = userUpdateModel.FirstName;
 			user.LastName = userUpdateModel.LastName;
@@ -87,9 +100,7 @@ namespace CussBuster.Core.Helpers
 
 			_userManager.UpdateExistingUser(user);
 
-			userUpdateModel.CreditCardNumber = CreateFuzzifiedCreditCardNumber(user.CreditCardNumber);
-
-			return userUpdateModel;
+			return MapUserToModel(user);
 		}
 
 		private void HandleUserSettings (User user, byte wordTypeId, bool propertySetting)
@@ -116,11 +127,6 @@ namespace CussBuster.Core.Helpers
 			{
 				user.UserSetting.Remove(setting);
 			}
-		}
-
-		private string CreateFuzzifiedCreditCardNumber(decimal creditCardNumber)
-		{
-			return $"************{(creditCardNumber % 10000).ToString().PadLeft(4, '0')}";
 		}
 	}
 }

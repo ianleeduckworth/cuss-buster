@@ -1,12 +1,14 @@
-﻿using CussBuster.Core.Models;
+﻿using CussBuster.Core.Data.Entities;
+using CussBuster.Core.Models;
 using System;
 
 namespace CussBuster.Core.Helpers
 {
 	public interface IWebPageHelper
 	{
-		Guid SignUp(UserSignupModel signupModel);
+		UserReturnModel SignUp(UserSignupModel signupModel, string userName);
 		UserReturnModel GetUserInfo(Guid apiTokenGuid);
-		UserUpdateModel UpdateUserInfo(Guid apiTokenGuid, UserUpdateModel userSignupModel);
+		UserReturnModel UpdateUserInfo(Guid apiTokenGuid, string password, UserUpdateModel userSignupModel);
+		UserReturnModel MapUserToModel(User user);
 	}
 }
