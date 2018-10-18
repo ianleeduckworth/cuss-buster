@@ -1,8 +1,10 @@
 ﻿using CussBuster.Core.Data.Entities;
 using CussBuster.Core.Data.Static;
 using CussBuster.Core.DataAccess;
+using CussBuster.Core.Exceptions;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
+using CussBuster.Core.Security;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -19,6 +21,7 @@ namespace CussBuster.Test
 		private Mock<IUserManager> _userManager;
 		private Mock<IAccountTypeHelper> _accountTypeHelper;
 		private Mock<IStandardPricingTierManager> _standardPricingTierManager;
+		private Mock<IPasswordHelper> _passwordHelper;
 
 		[SetUp]
 		public void SetUp()
@@ -26,8 +29,9 @@ namespace CussBuster.Test
 			_userManager = new Mock<IUserManager>();
 			_standardPricingTierManager = new Mock<IStandardPricingTierManager>();
 			_accountTypeHelper = new Mock<IAccountTypeHelper>();
+			_passwordHelper = new Mock<IPasswordHelper>();
 
-			_webPageHelper = new WebPageHelper(_userManager.Object, _standardPricingTierManager.Object, _accountTypeHelper.Object);
+			_webPageHelper = new WebPageHelper(_userManager.Object, _standardPricingTierManager.Object, _accountTypeHelper.Object, _passwordHelper.Object);
 		}
 
 		[Test]
@@ -74,6 +78,8 @@ namespace CussBuster.Test
 		[Test]
 		public void SignUp_NoCreditCardWithNonFreeAccount()
 		{
+			const string user = "user";
+
 			//arrange
 			var signupModel = new UserSignupModel
 			{
@@ -82,13 +88,15 @@ namespace CussBuster.Test
 			};
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel));
+			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
 			Assert.True(ex.Message == "A credit card number must be provided for any type of non-free account");
 		}
 
 		[Test]
 		public void SignUp_ExistingEmail()
 		{
+			const string user = "user";
+
 			//arrange
 			var signupModel = new UserSignupModel
 			{
@@ -99,13 +107,15 @@ namespace CussBuster.Test
 			_userManager.Setup(x => x.GetUserByEmail(signupModel.EmailAddress)).Returns(new User());
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel));
+			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
 			Assert.True(ex.Message == $"Account already exists for email address '{signupModel.EmailAddress}'");
 		}
 
 		[Test]
 		public void SignUp_ExistingPricingTier()
 		{
+			const string user = "user";
+
 			//arrange
 			var signupModel = new UserSignupModel
 			{
@@ -117,13 +127,15 @@ namespace CussBuster.Test
 			_standardPricingTierManager.Setup(x => x.GetStandardPricingTier(signupModel.PricingTierId)).Returns(default(StandardPricingTier));
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel));
+			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
 			Assert.True(ex.Message == $"Could not find AccountTypeId {signupModel.PricingTierId}");
 		}
 
 		[Test]
 		public void SignUp_Successful()
 		{
+			const string user = "user";
+
 			const string creditCardNumber = "4444333322221111";
 			const string firstName = "firstName";
 			const string lastName = "lastName";
@@ -153,13 +165,13 @@ namespace CussBuster.Test
 				StandardPricingTierId = pricingTierId
 			});
 
-			_userManager.Setup(x => x.AddNewuser(It.IsAny<UserSignupModel>(), It.IsAny<StandardPricingTier>())).Returns(new User
+			_userManager.Setup(x => x.AddNewuser(It.IsAny<UserSignupModel>(), It.IsAny<StandardPricingTier>(), It.IsAny<string>())).Returns(new User
 			{
 				UserId = userId
 			});
 
 			//act
-			_webPageHelper.SignUp(signupModel);
+			_webPageHelper.SignUp(signupModel, user);
 
 			//assert
 			_userManager.Verify(x => x.AddNewuser(It.Is<UserSignupModel>(m => 
@@ -173,7 +185,8 @@ namespace CussBuster.Test
 					m.Name == pricingTierName &&
 					m.PricePerMonth == pricePerMonth &&
 					m.StandardPricingTierId == pricingTierId
-			)));
+				), user
+			));
 
 			_userManager.Verify(x => x.SetStandardSettings(userId));
 		}
@@ -182,6 +195,7 @@ namespace CussBuster.Test
 		public void UpdateUserInfo_NullUserManager()
 		{
 			Guid apiToken = new Guid("d2ab6d8a-d8b3-42a6-9dd4-a36a8a9b1f79");
+			const string password = "password";
 
 			//arrange
 			var userUpdateModel = new UserUpdateModel();
@@ -189,11 +203,9 @@ namespace CussBuster.Test
 			_userManager.Setup(x => x.GetUserByApiToken(apiToken)).Returns(default(User));
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.UpdateUserInfo(apiToken, userUpdateModel));
+			var ex = Assert.Throws<UserNotFoundException>(() => _webPageHelper.UpdateUserInfo(apiToken, password, userUpdateModel));
 			Assert.True(ex.Message == $"User could not be found where API token is {apiToken}");
 		}
-
-
 
 		[Test]
 		public void UpdateUserInfo_Success()
@@ -205,6 +217,7 @@ namespace CussBuster.Test
 			const string firstName = "firstName";
 			const string lastName = "lastName";
 			const string emailAddress = "emailAddress";
+			const string password = "password";
 
 			//arrange
 			_accountTypeHelper.Setup(x => x.GetCallsPerMonth(accountTypeId)).Returns(callsPerMonth);
@@ -226,6 +239,7 @@ namespace CussBuster.Test
 				Email = $"{emailAddress}_test",
 				CallsPerMonth = callsPerMonth + 1,
 				PricePerMonth = pricePerMonth + 1,
+				Password = Encoding.ASCII.GetBytes(password)
 			});
 
 			var userUpdateModel = new UserUpdateModel
@@ -239,8 +253,10 @@ namespace CussBuster.Test
 				Sexism = true
 			};
 
+			_passwordHelper.Setup(x => x.CompareSecurePasswords(It.IsAny<byte[]>(), It.IsAny<byte[]>())).Returns(true);
+
 			//act
-			_webPageHelper.UpdateUserInfo(apiToken, userUpdateModel);
+			_webPageHelper.UpdateUserInfo(apiToken, password, userUpdateModel);
 
 			//assert
 			_userManager.Verify(x => x.UpdateExistingUser(It.Is<User>(y =>

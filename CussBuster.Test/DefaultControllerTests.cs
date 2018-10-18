@@ -1,14 +1,17 @@
 ﻿using CussBuster.Controllers;
 using CussBuster.Core.Data.Entities;
+using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
 using CussBuster.Core.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Moq.Language.Flow;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace CussBuster.Test
 {
@@ -18,14 +21,16 @@ namespace CussBuster.Test
 		private DefaultController _defaultController;
 		private Mock<IAppSettings> _appSettings;
 		private Mock<IMainHelper> _mainHelper;
+		private Mock<IUserManager> _userManager;
 
 		[SetUp]
 		public void SetUp()
 		{
 			_mainHelper = new Mock<IMainHelper>();
 			_appSettings = new Mock<IAppSettings>();
+			_userManager = new Mock<IUserManager>();
 
-			_defaultController = new DefaultController(_mainHelper.Object, _appSettings.Object);
+			_defaultController = new DefaultController(_mainHelper.Object, _appSettings.Object, _userManager.Object);
 		}
 
 		[Test]
@@ -142,13 +147,67 @@ namespace CussBuster.Test
 			{
 				CanCallApi = false
 			});
+			_mainHelper.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(false);
 
 			//act
-			var result = _defaultController.Post(text, authToken) as BadRequestObjectResult;
+			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result != null);
-			Assert.True(result.Value.ToString() == "You have reached your call limit for the month.  Please contact support for more information");
+			Assert.True(result is ObjectResult);
+
+			var response = result as ObjectResult;
+
+			Assert.True(response != null);
+			Assert.True(response.StatusCode == (int)HttpStatusCode.PaymentRequired);
+			Assert.True(response.Value.ToString() == "You have reached your call limit for the month.  Please contact support for more information");
 		}
-    }
+
+		[Test]
+		public void Post_CheckAccountLock()
+		{
+			const string text = "test text";
+			const string authToken = "testAuthToken";
+
+			var user = new User
+			{
+				CanCallApi = true
+			};
+
+			//arrange
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
+			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(user);
+			_userManager.Setup(x => x.CheckLockAccount(It.IsAny<User>())).Callback(() => user.CanCallApi = true);
+			_mainHelper.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(false);
+
+			//act
+			var result = _defaultController.Post(text, authToken);
+
+			//assert
+			Assert.True(result is OkObjectResult);
+		}
+
+		[Test]
+		public void Post_FirstOfMonth()
+		{
+			const string text = "test text";
+			const string authToken = "testAuthToken";
+
+			var user = new User
+			{
+				CanCallApi = true
+			};
+
+			//arrange
+			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
+			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(user);
+			_userManager.Setup(x => x.CheckLockAccount(It.IsAny<User>())).Callback(() => user.CanCallApi = false);
+			_mainHelper.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(true);
+
+			//act
+			var result = _defaultController.Post(text, authToken);
+
+			//assert
+			Assert.True(result is OkObjectResult);
+		}
+	}
 }

@@ -1,10 +1,12 @@
 ﻿using CussBuster.Controllers;
+using CussBuster.Core.Data.Static;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Net;
 
 namespace CussBuster.Test
 {
@@ -28,6 +30,7 @@ namespace CussBuster.Test
 
 			//assert
 			Assert.True(result is OkResult);
+			Assert.True((result as OkResult).StatusCode == (int)HttpStatusCode.OK);
 		}
 
 		[Test]
@@ -42,7 +45,7 @@ namespace CussBuster.Test
 			Assert.True(returnVal is ObjectResult);
 			var result = returnVal as ObjectResult;
 
-			Assert.True(result.StatusCode == 500);
+			Assert.True(result.StatusCode == (int)HttpStatusCode.BadRequest);
 			Assert.True(result.Value.ToString() == $"Could not parse API token passed in into a GUID.  API token: {apiToken}");
 		}
 
@@ -92,6 +95,7 @@ namespace CussBuster.Test
 		public void Put_BadApiToken()
 		{
 			const string apiToken = "badGuid";
+			const string password = "password";
 
 			var updateModel = new UserUpdateModel
 			{
@@ -99,13 +103,13 @@ namespace CussBuster.Test
 			};
 
 			//arrange / act
-			var returnVal = _webPageController.Put(apiToken, updateModel);
+			var returnVal = _webPageController.Put(apiToken, password, updateModel);
 
 			//assert
 			Assert.True(returnVal is ObjectResult);
 			var result = returnVal as ObjectResult;
 
-			Assert.True(result.StatusCode == 500);
+			Assert.True(result.StatusCode == (int)HttpStatusCode.BadRequest);
 			Assert.True(result.Value.ToString() == $"Could not parse API token passed in into a GUID.  API token: {apiToken}");
 		}
 
@@ -113,6 +117,7 @@ namespace CussBuster.Test
 		public void Put_Null()
 		{
 			Guid apiToken = new Guid("35b22f54-965c-4811-837a-feaafa728ef3");
+			const string password = "password";
 
 			var updateModel = new UserUpdateModel
 			{
@@ -120,10 +125,10 @@ namespace CussBuster.Test
 			};
 
 			//arrange
-			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<UserUpdateModel>())).Returns(default(UserUpdateModel));
+			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<UserUpdateModel>())).Returns(default(UserReturnModel));
 
 			//act
-			var result = _webPageController.Put(apiToken.ToString(), updateModel);
+			var result = _webPageController.Put(apiToken.ToString(), password, updateModel);
 
 			//assert
 			Assert.True(result is NotFoundResult);
@@ -133,6 +138,7 @@ namespace CussBuster.Test
 		public void Put_Exception()
 		{
 			Guid apiToken = new Guid("35b22f54-965c-4811-837a-feaafa728ef3");
+			const string password = "password";
 
 			var updateModel = new UserUpdateModel
 			{
@@ -142,10 +148,10 @@ namespace CussBuster.Test
 			const string  exceptionMessage = "exceptionMessage";
 
 			//arrange
-			_webPageHelper.Setup(x => x.UpdateUserInfo(apiToken, updateModel)).Throws(new Exception(exceptionMessage));
+			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<UserUpdateModel>())).Throws(new Exception(exceptionMessage));
 
 			//act
-			var returnVal = _webPageController.Put(apiToken.ToString(), updateModel);
+			var returnVal = _webPageController.Put(apiToken.ToString(), password, updateModel);
 
 			//assert
 			Assert.True(returnVal is ObjectResult);
@@ -163,10 +169,39 @@ namespace CussBuster.Test
 			const string emailAddress = "test@test.test";
 			const string firstName = "firstName";
 			const string lastName = "lastName";
-			const int pricingTierId = 1;
+			const int pricingTierId = (byte)StaticData.StaticPricingTier.Standard;
+			const string accountType = "Standard";
+			const string password = "password";
 			const bool racism = true;
 			const bool sexism = true;
 			const bool vulgarity = true;
+			const bool accountLocked = false;
+			const int callsPerMonth = 100;
+			const int callsThisMonth = 50;
+			const decimal pricePerMonth = 50;
+			const byte racismSeverity = 4;
+			const byte sexismSeverity = 5;
+			const byte vulgaritySeverity = 6;
+
+			var userReturnModel = new UserReturnModel
+			{
+				AccountLocked = accountLocked,
+				AccountType = accountType,
+				ApiToken = apiToken,
+				CallsPerMonth = callsPerMonth,
+				CallsThisMonth = callsThisMonth,
+				CreditCardNumber = creditCardNumber,
+				Email = emailAddress,
+				FirstName = firstName,
+				LastName = lastName,
+				PricePerMonth = pricePerMonth,
+				Racism = racism,
+				RacismSeverity = racismSeverity,
+				Sexism = sexism,
+				SexismSeverity = sexismSeverity,
+				Vulgarity = vulgarity,
+				VulgaritySeverity = vulgaritySeverity,
+			};
 
 			var userUpdateModel = new UserUpdateModel
 			{
@@ -181,24 +216,31 @@ namespace CussBuster.Test
 			};
 
 			//arrange
-			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<UserUpdateModel>())).Returns(userUpdateModel);
+			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<UserUpdateModel>())).Returns(userReturnModel);
 
 			//act
-			var returnVal = _webPageController.Put(apiToken.ToString(), userUpdateModel);
+			var returnVal = _webPageController.Put(apiToken.ToString(), password, userUpdateModel);
 
 			//assert
 			Assert.True(returnVal is OkObjectResult);
 			var result = returnVal as OkObjectResult;
-			var value = (UserUpdateModel)result.Value;
+			var value = (UserReturnModel)result.Value;
 
+			Assert.True(value.AccountLocked == accountLocked);
+			Assert.True(value.AccountType == accountType);
+			Assert.True(value.ApiToken == apiToken);
+			Assert.True(value.CallsPerMonth == callsPerMonth);
+			Assert.True(value.CallsThisMonth == callsThisMonth);
 			Assert.True(value.CreditCardNumber == creditCardNumber);
-			Assert.True(value.EmailAddress == emailAddress);
+			Assert.True(value.Email == emailAddress);
 			Assert.True(value.FirstName == firstName);
 			Assert.True(value.LastName == lastName);
-			Assert.True(value.PricingTierId == pricingTierId);
+			Assert.True(value.PricePerMonth == pricePerMonth);
 			Assert.True(value.Racism == racism);
+			Assert.True(value.RacismSeverity == racismSeverity);
 			Assert.True(value.Sexism == sexism);
 			Assert.True(value.Vulgarity == vulgarity);
+			Assert.True(value.VulgaritySeverity == vulgaritySeverity);
 		}
     }
 }
