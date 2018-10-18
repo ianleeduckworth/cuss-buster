@@ -12,7 +12,7 @@ namespace CussBuster.Core.DataAccess
 		User GetUserByEmail(string emailAddress);
 		User GetUserByApiToken(Guid ApiToken);
 		int GetCallsThisMonth(int userId);
-		User AddNewuser(UserSignupModel signupModel, StandardPricingTier pricingTier);
+		User AddNewuser(UserSignupModel signupModel, StandardPricingTier pricingTier, string userName);
 		User UpdateExistingUser(User user);
 		void SetStandardSettings(int userId);
 	}
