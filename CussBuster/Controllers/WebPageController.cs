@@ -1,23 +1,20 @@
-﻿using CussBuster.Core.Helpers;
+﻿using CussBuster.Core.ExtensionMethods;
+using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
 using log4net;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace CussBuster.Controllers
 {
 	[Route("v1/webPage")]
 	public class WebPageController : Controller
     {
-		private IWebPageHelper _webPageHelper;
-
-		private ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+		private readonly IWebPageHelper _webPageHelper;
+		private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
 		public WebPageController(IWebPageHelper webPageHelper)
 		{
@@ -30,7 +27,11 @@ namespace CussBuster.Controllers
 			try
 			{
 				if (!Guid.TryParse(apiToken, out Guid apiTokenGuid))
-					throw new InvalidOperationException($"Could not parse API token passed in into a GUID.  API token: {apiToken}");
+				{
+					string msg = $"Could not parse API token passed in into a GUID.  API token: {apiToken}";
+					_logger.Error(msg);
+					return StatusCode((int)HttpStatusCode.BadRequest, msg);
+				}
 
 				var result = _webPageHelper.GetUserInfo(apiTokenGuid);
 
@@ -42,7 +43,7 @@ namespace CussBuster.Controllers
 			catch (Exception ex)
 			{
 				_logger.Error($"Unhandled exception occurred when attempting to get user data", ex);
-				return StatusCode(500, ex.Message);
+				return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
 			}
 		}
 
@@ -51,29 +52,40 @@ namespace CussBuster.Controllers
 		{
 			try
 			{
+				const string user = "api";
+
 				ValidateModel(signupModel);
 
-				var result = _webPageHelper.SignUp(signupModel);
+				var result = _webPageHelper.SignUp(signupModel, user);
 				return Ok(result);
+			}
+			catch (InvalidOperationException ex)
+			{
+				_logger.Error(ex.Message);
+				return StatusCode((int)HttpStatusCode.BadRequest, ex.Message);
 			}
 			catch(Exception ex)
 			{
 				_logger.Error($"Unhandled exception occurred when attempting to sign up", ex);
-				return StatusCode(500, ex.Message);
+				return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
 			}
 		}
 
 		[HttpPut]
-		public IActionResult Put(string apiToken, [FromBody]UserUpdateModel userUpdateModel)
+		public IActionResult Put(string apiToken, string password, [FromBody]UserUpdateModel userUpdateModel)
 		{
 			try
 			{
 				ValidateModel(userUpdateModel);
 
 				if (!Guid.TryParse(apiToken, out Guid apiTokenGuid))
-					throw new InvalidOperationException($"Could not parse API token passed in into a GUID.  API token: {apiToken}");
+				{
+					string msg = $"Could not parse API token passed in into a GUID.  API token: {apiToken}";
+					_logger.Error(msg);
+					return StatusCode((int)HttpStatusCode.BadRequest, msg);
+				}
 
-				var result = _webPageHelper.UpdateUserInfo(apiTokenGuid, userUpdateModel);
+				var result = _webPageHelper.UpdateUserInfo(apiTokenGuid, password, userUpdateModel);
 
 				if (result == null)
 					return NotFound();
@@ -83,7 +95,7 @@ namespace CussBuster.Controllers
 			catch (Exception ex)
 			{
 				_logger.Error($"Unhandled exception occurred when attempting to update user data", ex);
-				return StatusCode(500, ex.Message);
+				return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
 			}
 		}
 
@@ -93,12 +105,11 @@ namespace CussBuster.Controllers
 			return Ok();
 		}
 
-		private void ValidateModel<T>(T model) where T : UserSignupModel
+		private void ValidateModel<T>(T model) where T : UserModel
 		{
 			if (!ModelState.IsValid)
 			{
-				var errors = ModelState.Select(x => x.Value.Errors).Where(y => y.Count > 0).Select(x => x[0].ErrorMessage).Aggregate((a, b) => $"{a}{Environment.NewLine}{b}");
-				throw new InvalidOperationException(errors);
+				throw new InvalidOperationException(ModelState.GetErrorsText());
 			}
 
 			if (!IsValidEmail(model.EmailAddress))
