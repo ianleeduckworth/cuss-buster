@@ -5,6 +5,7 @@ using CussBuster.Controllers;
 using CussBuster.Core.Data.Entities;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
+using CussBuster.Core.Security;
 using CussBuster.Core.Settings;
 using log4net;
 using log4net.Config;
@@ -69,6 +70,8 @@ namespace CussBuster
 			builder.RegisterType<AuthChecker>().As<IAuthChecker>().InstancePerLifetimeScope();
 			builder.RegisterType<AuditWriter>().As<IAuditWriter>().InstancePerLifetimeScope();
 			builder.RegisterType<UserManager>().As<IUserManager>().InstancePerLifetimeScope();
+			builder.RegisterType<SigninHelper>().As<ISigninHelper>().InstancePerLifetimeScope();
+			builder.RegisterType<PasswordHelper>().As<IPasswordHelper>().InstancePerLifetimeScope();
 			builder.RegisterType<WebPageHelper>().As<IWebPageHelper>().InstancePerLifetimeScope();
 			builder.RegisterType<AccountTypeHelper>().As<IAccountTypeHelper>().InstancePerLifetimeScope();
 			builder.RegisterType<StandardPricingTierManager>().As<IStandardPricingTierManager>();
