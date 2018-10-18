@@ -2,7 +2,7 @@
 
 namespace CussBuster.Core.Models
 {
-	public class UserSignupModel
+	public class UserModel
     {
 		[Required]
 		[MaxLength(100)]
@@ -10,16 +10,16 @@ namespace CussBuster.Core.Models
 
 		[Required]
 		[MaxLength(100)]
-        public string LastName { get; set; }
+		public string LastName { get; set; }
 
 		[Required]
 		[MaxLength(200)]
-        public string EmailAddress { get; set; }
+		public string EmailAddress { get; set; }
 
 		[CreditCard]
-        public string CreditCardNumber { get; set; }
+		public string CreditCardNumber { get; set; }
 
 		[Required]
-        public byte PricingTierId { get; set; }
+		public byte PricingTierId { get; set; }
 	}
 }

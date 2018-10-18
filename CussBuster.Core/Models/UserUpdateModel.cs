@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CussBuster.Core.Models
 {
-    public class UserUpdateModel : UserSignupModel
+    public class UserUpdateModel : UserModel
     {
 		public bool Racism { get; set; }
 
