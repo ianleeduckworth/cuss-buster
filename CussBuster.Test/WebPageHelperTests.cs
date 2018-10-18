@@ -89,7 +89,7 @@ namespace CussBuster.Test
 
 			//act / assert
 			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
-			Assert.True(ex.Message == "A credit card number must be provided for any type of non-free account");
+			Assert.True(ex.Message == "Credit card information must be provided for any non-free account") ;
 		}
 
 		[Test]
@@ -141,11 +141,18 @@ namespace CussBuster.Test
 			const string lastName = "lastName";
 			const string email = "email";
 			const byte pricingTierId = (byte)StaticData.StaticPricingTier.Standard;
-
 			const int userId = 1;
 			const int callsPerMonth = 100;
 			const string pricingTierName = "pricingTierName";
 			const decimal pricePerMonth = 100;
+			const string addressLine1 = "addressLine1";
+			const string addressLine2 = "addressLine2";
+			const string city = "city";
+			const string state = "state";
+			const string zipCode = "zipCode";
+			const string cvcCode = "cvcCode";
+			const string expirationDate = "expirationDate";
+			const string password = "password";
 
 			//arrange
 			var signupModel = new UserSignupModel
@@ -154,7 +161,15 @@ namespace CussBuster.Test
 				PricingTierId = pricingTierId,
 				EmailAddress = email,
 				FirstName = firstName,
-				LastName = lastName
+				LastName = lastName,
+				AddressLine1 = addressLine1,
+				AddressLine2 = addressLine2,
+				City = city,
+				State = state,
+				ZipCode = zipCode,
+				CreditCardCvcCode = cvcCode,
+				CreditCardExpirationDate = expirationDate,
+				Password = password
 			};
 
 			_standardPricingTierManager.Setup(x => x.GetStandardPricingTier(pricingTierId)).Returns(new StandardPricingTier
@@ -179,7 +194,15 @@ namespace CussBuster.Test
 					m.EmailAddress == email &&
 					m.FirstName == firstName &&
 					m.LastName == lastName &&
-					m.PricingTierId == pricingTierId), 
+					m.PricingTierId == pricingTierId &&
+					m.AddressLine1 == addressLine1 &&
+					m.AddressLine2 == addressLine2 &&
+					m.City == city &&
+					m.State == state &&
+					m.ZipCode == zipCode &&
+					m.CreditCardCvcCode == cvcCode &&
+					m.CreditCardExpirationDate == expirationDate &&
+					m.Password == password), 
 				It.Is<StandardPricingTier>(m =>
 					m.CallsPerMonth == callsPerMonth &&
 					m.Name == pricingTierName &&

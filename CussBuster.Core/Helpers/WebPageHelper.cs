@@ -60,8 +60,8 @@ namespace CussBuster.Core.Helpers
 
 		public UserReturnModel SignUp(UserSignupModel signupModel, string userName)
 		{
-			if (string.IsNullOrEmpty(signupModel.CreditCardNumber) && signupModel.PricingTierId != (byte)StaticData.StaticPricingTier.Free)
-				throw new InvalidOperationException("A credit card number must be provided for any type of non-free account");
+			if (!CheckCreditCardInformation(signupModel))
+				throw new InvalidOperationException("Credit card information must be provided for any non-free account");
 
 			var existingUser = _userManager.GetUserByEmail(signupModel.EmailAddress);
 			if (existingUser != null)
@@ -103,8 +103,29 @@ namespace CussBuster.Core.Helpers
 			return MapUserToModel(user);
 		}
 
+		private bool CheckCreditCardInformation(UserSignupModel userSignupModel)
+		{
+			if (userSignupModel.PricingTierId == (byte)StaticData.StaticPricingTier.Free)
+				return true;
+
+			if (string.IsNullOrEmpty(userSignupModel.FirstName) ||
+				string.IsNullOrEmpty(userSignupModel.LastName) ||
+				string.IsNullOrEmpty(userSignupModel.AddressLine1) ||
+				string.IsNullOrEmpty(userSignupModel.City) ||
+				string.IsNullOrEmpty(userSignupModel.State) ||
+				string.IsNullOrEmpty(userSignupModel.ZipCode) ||
+				string.IsNullOrEmpty(userSignupModel.CreditCardNumber) ||
+				string.IsNullOrEmpty(userSignupModel.CreditCardExpirationDate) ||
+				string.IsNullOrEmpty(userSignupModel.CreditCardCvcCode))
+				return false;
+
+			return true;
+		}
+
 		private void HandleUserSettings (User user, byte wordTypeId, bool propertySetting)
 		{
+			var now = DateTime.Now;
+
 			var setting = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == wordTypeId);
 			if (setting == null && propertySetting)
 			{
@@ -113,9 +134,9 @@ namespace CussBuster.Core.Helpers
 					WordTypeId = wordTypeId,
 					UserId = user.UserId,
 					Severity = 10,
-					CreatedDate = DateTime.Now,
+					CreatedDate = now,
 					CreatedBy = "test",
-					UpdatedDate = "test",
+					UpdatedDate = now,
 					UpdatedBy = "test"
 				});
 			}
