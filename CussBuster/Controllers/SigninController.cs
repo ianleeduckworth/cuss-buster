@@ -1,5 +1,4 @@
 ﻿using CussBuster.Core.Exceptions;
-using CussBuster.Core.ExtensionMethods;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
 using log4net;
@@ -31,13 +30,12 @@ namespace CussBuster.Controllers
 			catch (UserNotFoundException ex)
 			{
 				_logger.Warn($"Could not find user where email address is {signinModel.EmailAddress}", ex);
-				return StatusCode((int)HttpStatusCode.NoContent);
+				return BadRequest("Could not find user associated with your email address.  Please create an account if you have not done so.");
 			}
 			catch (UnauthorizedAccessException ex)
 			{
-				var msg = $"Unauthorized access occurred.  Email: {signinModel.EmailAddress}";
-				_logger.Error(msg, ex);
-				return StatusCode((int)HttpStatusCode.Unauthorized, msg);
+				_logger.Error($"Unauthorized access occurred.  Email: {signinModel.EmailAddress}", ex);
+				return StatusCode((int)HttpStatusCode.Unauthorized, ex.Message);
 			}
 			catch (Exception ex)
 			{
@@ -45,12 +43,6 @@ namespace CussBuster.Controllers
 				_logger.Error(msg, ex);
 				return StatusCode((int)HttpStatusCode.InternalServerError, msg);
 			}
-		}
-
-		[HttpOptions]
-		public IActionResult Options()
-		{
-			return Ok();
 		}
 	}
 }

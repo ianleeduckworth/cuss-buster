@@ -16,7 +16,7 @@ namespace CussBuster.Test
 			var result = list.IsNullOrZero();
 
 			//assert
-			Assert.True(result == true);
+			Assert.True(result, "Was expecting result to be true since list was null, but was false instead.");
 		}
 
 		[Test]
@@ -29,7 +29,7 @@ namespace CussBuster.Test
 			var result = list.IsNullOrZero();
 
 			//assert
-			Assert.True(result == true);
+			Assert.True(result, "Was expecting result to be true since list was empty, but was false instead.");
 		}
 
 		[Test]
@@ -42,7 +42,7 @@ namespace CussBuster.Test
 			var result = list.IsNullOrZero();
 
 			//assert
-			Assert.True(result == false);
+			Assert.True(!result, "Was expecting result to be false since list was populated, but was true instead.");
 		}
 
 		[Test]
@@ -55,7 +55,7 @@ namespace CussBuster.Test
 			var result = test.RemovePunctuationAndSymbols();
 
 			//assert
-			Assert.True(result == test);
+			AssertWithMessage.AreEqual(result, test, "string");
 		}
 
 		[Test]
@@ -69,7 +69,7 @@ namespace CussBuster.Test
 			var result = test.RemovePunctuationAndSymbols();
 
 			//assert
-			Assert.True(result == expectedResult);
+			AssertWithMessage.AreEqual(result, expectedResult, "string");
 		}
 	}
 }

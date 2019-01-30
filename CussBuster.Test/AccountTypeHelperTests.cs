@@ -37,7 +37,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetAccountTypeBasedOnPricing(_freePricePerMonth, _freeCallsPerMonth);
 
 			//assert
-			Assert.True(result == _free);
+			AssertWithMessage.AreEqual(result, _free, "account type");
 		}
 
 		[Test]
@@ -47,7 +47,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetAccountTypeBasedOnPricing(_standardPricePerMonth, _standardCallsPerMonth);
 
 			//assert
-			Assert.True(result == _standard);
+			AssertWithMessage.AreEqual(result, _standard, "account type");
 		}
 
 		[Test]
@@ -57,7 +57,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetAccountTypeBasedOnPricing(_premiumPricePerMonth, _premiumCallsPerMonth);
 
 			//assert
-			Assert.True(result == _premium);
+			AssertWithMessage.AreEqual(result, _premium, "account type");
 		}
 
 		[Test]
@@ -67,7 +67,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetCallsPerMonth((byte)StaticData.StaticPricingTier.Free);
 
 			//assert
-			Assert.True(result == _freeCallsPerMonth);
+			AssertWithMessage.AreEqual(result, _freeCallsPerMonth, "calls per month");
 		}
 
 		[Test]
@@ -77,7 +77,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetCallsPerMonth((byte)StaticData.StaticPricingTier.Standard);
 
 			//assert
-			Assert.True(result == _standardCallsPerMonth);
+			AssertWithMessage.AreEqual(result, _standardCallsPerMonth, "calls per month");
 		}
 
 		[Test]
@@ -87,7 +87,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetCallsPerMonth((byte)StaticData.StaticPricingTier.Premium);
 
 			//assert
-			Assert.True(result == _premiumCallsPerMonth);
+			AssertWithMessage.AreEqual(result, _premiumCallsPerMonth, "calls per month");
 		}
 
 		[Test]
@@ -97,7 +97,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetCallsPerMonth(_free);
 
 			//assert
-			Assert.True(result == _freeCallsPerMonth);
+			AssertWithMessage.AreEqual(result, _freeCallsPerMonth, "calls per month");
 		}
 
 		[Test]
@@ -107,7 +107,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetCallsPerMonth(_standard);
 
 			//assert
-			Assert.True(result == _standardCallsPerMonth);
+			AssertWithMessage.AreEqual(result, _standardCallsPerMonth, "calls per month");
 		}
 
 		[Test]
@@ -117,7 +117,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetCallsPerMonth(_premium);
 
 			//assert
-			Assert.True(result == _premiumCallsPerMonth);
+			AssertWithMessage.AreEqual(result, _premiumCallsPerMonth, "calls per month");
 		}
 
 		[Test]
@@ -127,7 +127,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetPricePerMonth((byte)StaticData.StaticPricingTier.Free);
 
 			//assert
-			Assert.True(result == _freePricePerMonth);
+			AssertWithMessage.AreEqual(result, _freePricePerMonth, "price per month");
 		}
 
 		[Test]
@@ -137,7 +137,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetPricePerMonth((byte)StaticData.StaticPricingTier.Standard);
 
 			//assert
-			Assert.True(result == _standardPricePerMonth);
+			AssertWithMessage.AreEqual(result, _standardPricePerMonth, "price per month");
 		}
 
 		[Test]
@@ -147,7 +147,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetPricePerMonth((byte)StaticData.StaticPricingTier.Premium);
 
 			//assert
-			Assert.True(result == _premiumPricePerMonth);
+			AssertWithMessage.AreEqual(result, _premiumPricePerMonth, "price per month");
 		}
 
 		[Test]
@@ -157,7 +157,7 @@ namespace CussBuster.Test
 			var result = _accountTypeHelper.GetPricePerMonth(_free);
 
 			//assert
-			Assert.True(result == _freePricePerMonth);
+			AssertWithMessage.AreEqual(result, _freePricePerMonth, "price per month");
 		}
 
 		[Test]
@@ -168,6 +168,8 @@ namespace CussBuster.Test
 
 			//assert
 			Assert.True(result == _standardPricePerMonth);
+			AssertWithMessage.AreEqual(result, _standardPricePerMonth, "price per month");
+
 		}
 
 		[Test]
@@ -178,6 +180,7 @@ namespace CussBuster.Test
 
 			//assert
 			Assert.True(result == _premiumPricePerMonth);
+			AssertWithMessage.AreEqual(result, _premiumPricePerMonth, "price per month");
 		}
 
 	}

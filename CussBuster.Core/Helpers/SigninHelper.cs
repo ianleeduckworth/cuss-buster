@@ -29,7 +29,11 @@ namespace CussBuster.Core.Helpers
 				throw new UserNotFoundException($"Could not find user where email address is {email}");
 
 			if (_passwordHelper.CompareSecurePasswords(Encoding.ASCII.GetBytes(password), user.Password))
+			{
+				_userManager.CheckUnlockAccount(user);
 				return _webPageHelper.MapUserToModel(user);
+			}
+				
 
 			throw new UnauthorizedAccessException("Password entered was incorrect");
 		}

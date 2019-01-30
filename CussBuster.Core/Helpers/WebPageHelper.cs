@@ -47,8 +47,8 @@ namespace CussBuster.Core.Helpers
 				CallsPerMonth = user.CallsPerMonth,
 				PricePerMonth = user.PricePerMonth,
 				AccountType = _accountTypeHelper.GetAccountTypeBasedOnPricing(user.PricePerMonth, user.CallsPerMonth),
-				CreditCardNumber = $"************{(user.CreditCardNumber % 10000).ToString().PadLeft(4, '0')}",
-				CallsThisMonth = user.CallLog.Count(),
+				CreditCardNumber = user.CreditCardNumber != null ? $"************{(user.CreditCardNumber % 10000).ToString().PadLeft(4, '0')}" : null,
+				CallsThisMonth = _userManager.GetCallsThisMonth(user),
 				Racism = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur) != null ? true : false,
 				RacismSeverity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.RacialSlur)?.Severity,
 				Vulgarity = user?.UserSetting?.FirstOrDefault(x => x.WordTypeId == (byte)StaticData.WordType.Vulgarity) != null ? true : false,
@@ -61,15 +61,15 @@ namespace CussBuster.Core.Helpers
 		public UserReturnModel SignUp(UserSignupModel signupModel, string userName)
 		{
 			if (!CheckCreditCardInformation(signupModel))
-				throw new InvalidOperationException("Credit card information must be provided for any non-free account");
+				throw new UserInputException("Credit card information must be provided for any non-free account");
 
 			var existingUser = _userManager.GetUserByEmail(signupModel.EmailAddress);
 			if (existingUser != null)
-				throw new InvalidOperationException($"Account already exists for email address '{signupModel.EmailAddress}'");
+				throw new UserInputException($"Account already exists for email address '{signupModel.EmailAddress}'");
 
 			var tier = _standardPricingTierManager.GetStandardPricingTier(signupModel.PricingTierId);
 			if (tier == null)
-				throw new InvalidOperationException($"Could not find AccountTypeId {signupModel.PricingTierId}");
+				throw new UserInputException($"Could not find AccountTypeId {signupModel.PricingTierId}");
 
 			var user = _userManager.AddNewuser(signupModel, tier, userName);
 			_userManager.SetStandardSettings(user.UserId);

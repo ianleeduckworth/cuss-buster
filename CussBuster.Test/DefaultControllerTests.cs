@@ -44,10 +44,10 @@ namespace CussBuster.Test
 			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 
 			//act
-			var result = _defaultController.Post(text, authToken) as UnauthorizedResult;
+			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result != null);
+			AssertWithMessage.IsOfType(result, typeof(UnauthorizedResult));
 		}
 
 		[Test]
@@ -61,17 +61,24 @@ namespace CussBuster.Test
 			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 
 			//act
-			var result = _defaultController.Post(text, authToken) as BadRequestResult;
+			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result != null);
+			AssertWithMessage.IsOfType(result, typeof(BadRequestResult));
 		}
 
 		[Test]
 		public void Post_Ok()
 		{
 			const string authToken = "testAuthToken";
-			const string text = "test text";
+			const string text = "text";
+			const int occurances = 1;
+			const byte severity = 2;
+			const string word = "word";
+			const string wordType = "wordType";
+			const byte wordTypeId = 3;
+
+
 			User user = new User
 			{
 				CanCallApi = true
@@ -84,37 +91,43 @@ namespace CussBuster.Test
 			{
 				new ReturnModel
 				{
-					Occurrences = 1,
-					Severity = 1,
-					Word = "text",
-					WordType = "Vulgarity",
-					WordTypeId = 1
+					Occurrences = occurances,
+					Severity = severity,
+					Word = word,
+					WordType = wordType,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			//act
-			var result = _defaultController.Post(text, authToken) as OkObjectResult;
+			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result != null);
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
+			var response = result as OkObjectResult;
 
-			var value = (result.Value as IEnumerable<ReturnModel>).First();
+			AssertWithMessage.IsOfType(response.Value, typeof(List<ReturnModel>));
+			var list = response.Value as List<ReturnModel>;
 
-			Assert.True(value.Occurrences == 1);
-			Assert.True(value.Severity == 1);
-			Assert.True(value.Word == "text");
-			Assert.True(value.WordType == "Vulgarity");
-			Assert.True(value.WordTypeId == 1);
+			AssertWithMessage.AreEqual(list.Count, 1, "number of items in return model");
+
+			var value = ((result as OkObjectResult).Value as List<ReturnModel>).First();
+
+			AssertWithMessage.AreEqual(value.Occurrences, occurances, nameof(value.Occurrences));
+			AssertWithMessage.AreEqual(value.Severity, severity, nameof(value.Severity));
+			AssertWithMessage.AreEqual(value.Word, word, nameof(value.Word));
+			AssertWithMessage.AreEqual(value.WordType, wordType, nameof(value.WordType));
+			AssertWithMessage.AreEqual(value.WordTypeId, wordTypeId, nameof(value.WordTypeId));
 		}
 
 		[Test]
 		public void Get_Default()
 		{
 			//arrange /act
-			var result = _defaultController.Default() as OkResult;
+			var result = _defaultController.Default();
 
 			//assert
-			Assert.True(result != null);
+			AssertWithMessage.IsOfType(result, typeof(OkResult));
 		}
 
 		[Test]
@@ -128,11 +141,13 @@ namespace CussBuster.Test
 			_appSettings.SetupGet(x => x.CharacterLimit).Returns(characterLimit);
 
 			//act
-			var result = _defaultController.Post(text, string.Empty) as BadRequestObjectResult;
+			var result = _defaultController.Post(text, string.Empty);
+			AssertWithMessage.IsOfType(result, typeof(BadRequestObjectResult));
+
+			var response = result as BadRequestObjectResult;
 
 			//assert
-			Assert.True(result != null);
-			Assert.True(result.Value.ToString() == $"Text passed in is longer than the {characterLimit} character limit.  Text length: {text.Length}.");
+			AssertWithMessage.AreEqual(response.Value.ToString(), $"Text passed in is longer than the {characterLimit} character limit.  Text length: {text.Length}.", "response value");
 		}
 
 		[Test]
@@ -147,19 +162,18 @@ namespace CussBuster.Test
 			{
 				CanCallApi = false
 			});
-			_mainHelper.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(false);
+			_userManager.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(false);
 
 			//act
 			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result is ObjectResult);
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
 
 			var response = result as ObjectResult;
 
-			Assert.True(response != null);
-			Assert.True(response.StatusCode == (int)HttpStatusCode.PaymentRequired);
-			Assert.True(response.Value.ToString() == "You have reached your call limit for the month.  Please contact support for more information");
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.PaymentRequired, "status code");
+			AssertWithMessage.AreEqual(response.Value.ToString(), "You have reached your call limit for the month.  Please contact support for more information", "response value");
 		}
 
 		[Test]
@@ -177,13 +191,13 @@ namespace CussBuster.Test
 			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(user);
 			_userManager.Setup(x => x.CheckLockAccount(It.IsAny<User>())).Callback(() => user.CanCallApi = true);
-			_mainHelper.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(false);
+			_userManager.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(false);
 
 			//act
 			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result is OkObjectResult);
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
 		}
 
 		[Test]
@@ -201,13 +215,13 @@ namespace CussBuster.Test
 			_mainHelper.Setup(x => x.CheckCharacterLimit(text)).Returns(true);
 			_mainHelper.Setup(x => x.CheckAuthorization(authToken)).Returns(user);
 			_userManager.Setup(x => x.CheckLockAccount(It.IsAny<User>())).Callback(() => user.CanCallApi = false);
-			_mainHelper.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(true);
+			_userManager.Setup(x => x.CheckUnlockAccount(It.IsAny<User>())).Returns(true);
 
 			//act
 			var result = _defaultController.Post(text, authToken);
 
 			//assert
-			Assert.True(result is OkObjectResult);
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
 		}
 	}
 }

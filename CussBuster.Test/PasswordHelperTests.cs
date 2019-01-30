@@ -26,7 +26,7 @@ namespace CussBuster.Test
 			var result = _passwordHelper.GenerateSecurePassword(Encoding.ASCII.GetBytes(password));
 
 			//assert
-			Assert.True(result.Length == 256);
+			AssertWithMessage.AreEqual(result.Length, 256, "password bytes length");
 		}
 
 		[TestCase("q4krqk4jkgjkgjkbb", "jaekfjaekfj5bnakefjakefj")]
@@ -42,7 +42,7 @@ namespace CussBuster.Test
 			var result = _passwordHelper.CompareSecurePasswords(Encoding.ASCII.GetBytes(enteredPassword), hashedStoredPassword);
 
 			//assert
-			Assert.False(result);
+			Assert.False(result, $"Was expecting passwords to not match, but they matched.  Stored password: {storedPassword}.  Entered password: {enteredPassword}");
 		}
 
 		[TestCase("kajefkajefkajefkjaekjf", "kajefkajefkajefkjaekjf")]
@@ -58,20 +58,7 @@ namespace CussBuster.Test
 			var result = _passwordHelper.CompareSecurePasswords(Encoding.ASCII.GetBytes(enteredPassword), secureStoredPassword);
 
 			//assert
-			Assert.True(result);
-		}
-
-		[Test]
-		public void GenerateHashedPassword()
-		{
-			//arrange
-			const string password = "password123";
-
-			//act
-			var hashedPassword = _passwordHelper.GenerateSecurePassword(Encoding.ASCII.GetBytes(password));
-
-			//assert
-			Console.WriteLine(hashedPassword);
+			Assert.True(result, $"Was expecting passwords to match, but they did not match.  Stored password: {storedPassword}.  Entered password: {enteredPassword}");
 		}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CussBuster.Core.Data.Entities;
+using CussBuster.Core.Data.Static;
 using CussBuster.Core.DataAccess;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
@@ -36,169 +37,200 @@ namespace CussBuster.Test
 		[Test]
 		public void FindMatches_SingleMatch()
 		{
+			const string word = "test";
+			const byte searchTypeId = (byte)StaticData.SearchType.Equals;
+			const byte severity = 2;
+			const byte wordTypeId = (byte)StaticData.WordType.Vulgarity;
+
 			//arrange
 			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
-					Word = "test",
-					SearchTypeId = 1,
-					Severity = 1,
-					WordTypeId = 1
+					Word = word,
+					SearchTypeId = searchTypeId,
+					Severity = severity,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			User user = new User();
 
 			//act
-			var result = _mainHelper.FindMatches("this is a test", user);
+			var result = _mainHelper.FindMatches($"this is a {word}", user);
 
 			//assert
+			AssertWithMessage.AreEqual(result.Count(), 1, "item count");
 			var item = result.First();
-
-			Assert.True(result.Count() == 1);
-			Assert.True(item.Occurrences == 1);
-			Assert.True(item.Severity == 1);
-			Assert.True(item.Word == "test");
-			Assert.True(item.WordType == "Vulgarity");
+			
+			AssertWithMessage.AreEqual(item.Occurrences, 1, nameof(item.Occurrences));
+			AssertWithMessage.AreEqual(item.Word, word, nameof(item.Word));
+			AssertWithMessage.AreEqual(item.Severity, severity, nameof(item.Severity));
+			AssertWithMessage.AreEqual(item.WordTypeId, wordTypeId, nameof(item.WordTypeId));
 		}
 
 		[Test]
 		public void FindMatches_SingleMatch_CaseMismatch()
 		{
+			const string word = "test";
+			const byte searchTypeId = (byte)StaticData.SearchType.Equals;
+			const byte severity = 2;
+			const byte wordTypeId = (byte)StaticData.WordType.Vulgarity;
+
 			//arrange
 			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
-					Word = "test",
-					SearchTypeId = 1,
-					Severity = 1,
-					WordTypeId = 1
+					Word = word,
+					SearchTypeId = searchTypeId,
+					Severity = severity,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			User user = new User();
 
 			//act
-			var result = _mainHelper.FindMatches("this is a TEST", user);
+			var result = _mainHelper.FindMatches($"this is a {word.ToUpper()}", user);
 
 			//assert
+			AssertWithMessage.AreEqual(result.Count(), 1, "item count");
 			var item = result.First();
 
-			Assert.True(result.Count() == 1);
-			Assert.True(item.Occurrences == 1);
-			Assert.True(item.Severity == 1);
-			Assert.True(item.Word == "test");
-			Assert.True(item.WordType == "Vulgarity");
+			AssertWithMessage.AreEqual(item.Occurrences, 1, nameof(item.Occurrences));
+			AssertWithMessage.AreEqual(item.Word, word, nameof(item.Word));
+			AssertWithMessage.AreEqual(item.Severity, severity, nameof(item.Severity));
+			AssertWithMessage.AreEqual(item.WordTypeId, wordTypeId, nameof(item.WordTypeId));
 		}
 
 		[Test]
 		public void FindMatches_SingleMatch_EqualsSearch_Negative()
 		{
+			const string word = "test";
+			const byte searchTypeId = (byte)StaticData.SearchType.Equals;
+			const byte severity = 2;
+			const byte wordTypeId = (byte)StaticData.WordType.Vulgarity;
+
 			//arrange
 			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
-					Word = "test",
-					SearchTypeId = 1,
-					Severity = 1,
-					WordTypeId = 1
+					Word = word,
+					SearchTypeId = searchTypeId,
+					Severity = severity,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			User user = new User();
 
 			//act
-			var result = _mainHelper.FindMatches("we are testing", user);
+			var result = _mainHelper.FindMatches($"we are {word}ing", user);
 
 			//assert
-			Assert.True(result.Count() == 0);
+			AssertWithMessage.AreEqual(result.Count(), 0, "item count");
 		}
 
 		[Test]
 		public void FindMatches_SingleMatch_ContainsSearch()
 		{
+			const string word = "test";
+			const byte searchTypeId = (byte)StaticData.SearchType.Contains;
+			const byte severity = 2;
+			const byte wordTypeId = (byte)StaticData.WordType.Vulgarity;
+
 			//arrange
 			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
-					Word = "test",
-					SearchTypeId = 2,
-					Severity = 1,
-					WordTypeId = 1
+					Word = word,
+					SearchTypeId = searchTypeId,
+					Severity = severity,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			User user = new User();
 
 			//act
-			var result = _mainHelper.FindMatches("we are testing", user);
+			var result = _mainHelper.FindMatches($"we are {word}ing", user);
 
 			//assert
+			AssertWithMessage.AreEqual(result.Count(), 1, "item count");
 			var item = result.First();
 
-			Assert.True(result.Count() == 1);
-			Assert.True(item.Occurrences == 1);
-			Assert.True(item.Severity == 1);
-			Assert.True(item.Word == "testing");
-			Assert.True(item.WordType == "Vulgarity");
+			AssertWithMessage.AreEqual(item.Occurrences, 1, nameof(item.Occurrences));
+			AssertWithMessage.AreEqual(item.Word, $"{word}ing", nameof(item.Word));
+			AssertWithMessage.AreEqual(item.Severity, severity, nameof(item.Severity));
+			AssertWithMessage.AreEqual(item.WordTypeId, wordTypeId, nameof(item.WordTypeId));
 		}
 
 		[Test]
 		public void FindMatches_SingleMatch_MultipleOccurances()
 		{
+			const string word = "test";
+			const byte searchTypeId = (byte)StaticData.SearchType.Equals;
+			const byte severity = 2;
+			const byte wordTypeId = (byte)StaticData.WordType.Vulgarity;
+
 			//arrange
 			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
-					Word = "test",
-					SearchTypeId = 1,
-					Severity = 1,
-					WordTypeId = 1
+					Word = word,
+					SearchTypeId = searchTypeId,
+					Severity = severity,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			User user = new User();
 
 			//act
-			var result = _mainHelper.FindMatches("this is a test test", user);
+			var result = _mainHelper.FindMatches($"this is a {word} {word}", user);
 
 			//assert
+			AssertWithMessage.AreEqual(result.Count(), 1, "item count");
 			var item = result.First();
-
-			Assert.True(result.Count() == 1);
-			Assert.True(item.Occurrences == 2);
-			Assert.True(item.Severity == 1);
-			Assert.True(item.Word == "test");
-			Assert.True(item.WordType == "Vulgarity");
+			
+			AssertWithMessage.AreEqual(item.Occurrences, 2, nameof(item.Occurrences));
+			AssertWithMessage.AreEqual(item.Word, word, nameof(item.Word));
+			AssertWithMessage.AreEqual(item.Severity, severity, nameof(item.Severity));
+			AssertWithMessage.AreEqual(item.WordTypeId, wordTypeId, nameof(item.WordTypeId));
 		}
 
 		[Test]
 		public void FindMatches_NoMatches()
 		{
+			const string word = "test";
+			const string searchWord = "foo";
+			const byte searchTypeId = (byte)StaticData.SearchType.Equals;
+			const byte severity = 2;
+			const byte wordTypeId = (byte)StaticData.WordType.Vulgarity;
+
 			//arrange
 			_badWordCache.SetupGet(x => x.Words).Returns(new List<WordModel>
 			{
 				new WordModel
 				{
-					Word = "test",
-					SearchTypeId = 1,
-					Severity = 1,
-					WordTypeId = 1
+					Word = word,
+					SearchTypeId = searchTypeId,
+					Severity = severity,
+					WordTypeId = wordTypeId
 				}
 			});
 
 			User user = new User();
 
 			//act
-			var result = _mainHelper.FindMatches("this is a foo", user);
+			var result = _mainHelper.FindMatches($"this is a {searchWord}", user);
 
 			//assert
-			Assert.True(result.Count() == 0);
+			AssertWithMessage.AreEqual(result.Count(), 0, "number of matches");
 		}
 
 		[Test]
@@ -206,9 +238,9 @@ namespace CussBuster.Test
 		{
 			//arrange / act
 			var result = _mainHelper.CheckAuthorization("test");
-
+			
 			//assert
-			Assert.True(result == null);
+			AssertWithMessage.IsNull(result, "user");
 		}
 
 		[Test]
@@ -224,7 +256,7 @@ namespace CussBuster.Test
 			var result = _mainHelper.CheckAuthorization(guidString);
 
 			//assert
-			Assert.True(result == null);
+			AssertWithMessage.IsNull(result, "user");
 		}
 
 		[Test]
@@ -246,46 +278,64 @@ namespace CussBuster.Test
 			var result = _mainHelper.CheckAuthorization(guidString);
 
 			//assert
-			Assert.True(result.UserId == userId);
+			AssertWithMessage.AreEqual(result.UserId, userId, nameof(result.UserId));
 		}
 
 		[Test]
 		public void CheckCharacterLimit_UnderLimit()
 		{
+			const int characterLimit = 5;
+			var word = string.Empty;
+
+			for (int i = 0; i < characterLimit - 1; i++)
+				word += "a";
+
 			//arrange
-			_appSettings.Setup(x => x.CharacterLimit).Returns(5);
+			_appSettings.Setup(x => x.CharacterLimit).Returns(characterLimit);
 
 			//act
-			var result = _mainHelper.CheckCharacterLimit("abcd");
+			var result = _mainHelper.CheckCharacterLimit(word);
 
 			//assert
-			Assert.True(result == true);
+			AssertWithMessage.AreEqual(result, true, "character limit");
 		}
 
 		[Test]
 		public void CheckCharacterLimit_AtLimit()
 		{
+			const int characterLimit = 5;
+			var word = string.Empty;
+
+			for (int i = 0; i < characterLimit; i++)
+				word += "a";
+
 			//arrange
-			_appSettings.Setup(x => x.CharacterLimit).Returns(5);
+			_appSettings.Setup(x => x.CharacterLimit).Returns(characterLimit);
 
 			//act
-			var result = _mainHelper.CheckCharacterLimit("abcde");
+			var result = _mainHelper.CheckCharacterLimit(word);
 
 			//assert
-			Assert.True(result == true);
+			AssertWithMessage.AreEqual(result, true, "character limit");
 		}
 
 		[Test]
 		public void CheckCharacterLimit_OverLimit()
 		{
+			const int characterLimit = 5;
+			var word = string.Empty;
+
+			for (int i = 0; i < characterLimit + 1; i++)
+				word += "a";
+
 			//arrange
-			_appSettings.Setup(x => x.CharacterLimit).Returns(5);
+			_appSettings.Setup(x => x.CharacterLimit).Returns(characterLimit);
 
 			//act
-			var result = _mainHelper.CheckCharacterLimit("abcdef");
+			var result = _mainHelper.CheckCharacterLimit(word);
 
 			//assert
-			Assert.True(result == false);
+			AssertWithMessage.AreEqual(result, false, "character limit");
 		}
 
 		[Test]
@@ -298,7 +348,7 @@ namespace CussBuster.Test
 			_mainHelper.FindMatches("test text", user);
 
 			//assert
-			_auditWriter.Verify(x => x.LogUserCall(user));
+			_auditWriter.Verify(x => x.LogUserCall(user), $"{nameof(_auditWriter.Verify)} was not called");
 		}
 	}
 }

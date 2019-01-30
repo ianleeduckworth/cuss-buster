@@ -29,8 +29,11 @@ namespace CussBuster.Test
 			var result = _webPageController.Options();
 
 			//assert
-			Assert.True(result is OkResult);
-			Assert.True((result as OkResult).StatusCode == (int)HttpStatusCode.OK);
+
+			AssertWithMessage.IsOfType(result, typeof(OkResult));
+			var response = result as OkResult;
+
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.OK);
 		}
 
 		[Test]
@@ -39,14 +42,14 @@ namespace CussBuster.Test
 			const string apiToken = "badGuid";
 
 			//arrange / act
-			var returnVal = _webPageController.Get(apiToken);
+			var result = _webPageController.Get(apiToken);
 
 			//assert
-			Assert.True(returnVal is ObjectResult);
-			var result = returnVal as ObjectResult;
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
+			var response = result as ObjectResult;
 
-			Assert.True(result.StatusCode == (int)HttpStatusCode.BadRequest);
-			Assert.True(result.Value.ToString() == $"Could not parse API token passed in into a GUID.  API token: {apiToken}");
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.BadRequest);
+			AssertWithMessage.AreEqual(response.Value.ToString(), $"Could not parse API token passed in into a GUID.  API token: {apiToken}", "exception message");
 		}
 
 		[Test]
@@ -75,20 +78,23 @@ namespace CussBuster.Test
 			});
 
 			//act
-			var result = _webPageController.Get(apiToken.ToString()) as OkObjectResult;
+			var result = _webPageController.Get(apiToken.ToString());
 
 			//assert
-			Assert.True(result != null);
-			var value = result.Value as UserReturnModel;
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
+			var response = result as OkObjectResult;
 
-			Assert.True(value.AccountLocked == accountLocked);
-			Assert.True(value.AccountType == accountType);
-			Assert.True(value.ApiToken == apiToken);
-			Assert.True(value.CallsPerMonth == callsPerMonth);
-			Assert.True(value.Email == email);
-			Assert.True(value.FirstName == firstName);
-			Assert.True(value.LastName == lastName);
-			Assert.True(value.PricePerMonth == pricePerMonth);
+			AssertWithMessage.IsOfType(response.Value, typeof(UserReturnModel));
+			var value = response.Value as UserReturnModel;
+
+			AssertWithMessage.AreEqual(value.AccountLocked, accountLocked, nameof(value.AccountLocked));
+			AssertWithMessage.AreEqual(value.AccountType, accountType, nameof(value.AccountType));
+			AssertWithMessage.AreEqual(value.ApiToken, apiToken, nameof(value.ApiToken));
+			AssertWithMessage.AreEqual(value.CallsPerMonth, callsPerMonth, nameof(value.CallsPerMonth));
+			AssertWithMessage.AreEqual(value.Email, email, nameof(value.Email));
+			AssertWithMessage.AreEqual(value.FirstName, firstName, nameof(value.FirstName));
+			AssertWithMessage.AreEqual(value.LastName, lastName, nameof(value.LastName));
+			AssertWithMessage.AreEqual(value.PricePerMonth, pricePerMonth, nameof(value.PricePerMonth));
 		}
 
 		[Test]
@@ -103,14 +109,14 @@ namespace CussBuster.Test
 			};
 
 			//arrange / act
-			var returnVal = _webPageController.Put(apiToken, password, updateModel);
+			var result = _webPageController.Put(apiToken, password, updateModel);
 
 			//assert
-			Assert.True(returnVal is ObjectResult);
-			var result = returnVal as ObjectResult;
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
+			var response = result as ObjectResult;
 
-			Assert.True(result.StatusCode == (int)HttpStatusCode.BadRequest);
-			Assert.True(result.Value.ToString() == $"Could not parse API token passed in into a GUID.  API token: {apiToken}");
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.BadRequest, "status code");
+			AssertWithMessage.AreEqual(response.Value.ToString(), $"Could not parse API token passed in into a GUID.  API token: {apiToken}", "exception message");
 		}
 
 		[Test]
@@ -131,7 +137,7 @@ namespace CussBuster.Test
 			var result = _webPageController.Put(apiToken.ToString(), password, updateModel);
 
 			//assert
-			Assert.True(result is NotFoundResult);
+			AssertWithMessage.IsOfType(result, typeof(NotFoundResult));
 		}
 
 		[Test]
@@ -151,14 +157,14 @@ namespace CussBuster.Test
 			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<UserUpdateModel>())).Throws(new Exception(exceptionMessage));
 
 			//act
-			var returnVal = _webPageController.Put(apiToken.ToString(), password, updateModel);
+			var result = _webPageController.Put(apiToken.ToString(), password, updateModel);
 
 			//assert
-			Assert.True(returnVal is ObjectResult);
-			var result = returnVal as ObjectResult;
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
+			var response = result as ObjectResult;
 
-			Assert.True(result.StatusCode == 500);
-			Assert.True(result.Value.ToString() == exceptionMessage);
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.InternalServerError, "status code");
+			AssertWithMessage.AreEqual(response.Value.ToString(), exceptionMessage, "exception message");
 		}
 
 		[Test]
@@ -219,28 +225,67 @@ namespace CussBuster.Test
 			_webPageHelper.Setup(x => x.UpdateUserInfo(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<UserUpdateModel>())).Returns(userReturnModel);
 
 			//act
-			var returnVal = _webPageController.Put(apiToken.ToString(), password, userUpdateModel);
+			var result = _webPageController.Put(apiToken.ToString(), password, userUpdateModel);
 
 			//assert
-			Assert.True(returnVal is OkObjectResult);
-			var result = returnVal as OkObjectResult;
-			var value = (UserReturnModel)result.Value;
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
+			var response = result as OkObjectResult;
 
-			Assert.True(value.AccountLocked == accountLocked);
-			Assert.True(value.AccountType == accountType);
-			Assert.True(value.ApiToken == apiToken);
-			Assert.True(value.CallsPerMonth == callsPerMonth);
-			Assert.True(value.CallsThisMonth == callsThisMonth);
-			Assert.True(value.CreditCardNumber == creditCardNumber);
-			Assert.True(value.Email == emailAddress);
-			Assert.True(value.FirstName == firstName);
-			Assert.True(value.LastName == lastName);
-			Assert.True(value.PricePerMonth == pricePerMonth);
-			Assert.True(value.Racism == racism);
-			Assert.True(value.RacismSeverity == racismSeverity);
-			Assert.True(value.Sexism == sexism);
-			Assert.True(value.Vulgarity == vulgarity);
-			Assert.True(value.VulgaritySeverity == vulgaritySeverity);
+			AssertWithMessage.IsOfType(response.Value, typeof(UserReturnModel));
+			var value = response.Value as UserReturnModel;
+
+			AssertWithMessage.AreEqual(value.AccountLocked, accountLocked, nameof(value.AccountLocked));
+			AssertWithMessage.AreEqual(value.AccountType, accountType, nameof(value.AccountType));
+			AssertWithMessage.AreEqual(value.ApiToken, apiToken, nameof(value.ApiToken));
+			AssertWithMessage.AreEqual(value.CallsPerMonth, callsPerMonth, nameof(value.CallsPerMonth));
+			AssertWithMessage.AreEqual(value.CallsThisMonth, callsThisMonth, nameof(value.CallsThisMonth));
+			AssertWithMessage.AreEqual(value.CreditCardNumber, creditCardNumber, nameof(value.CreditCardNumber));
+			AssertWithMessage.AreEqual(value.Email, emailAddress, nameof(value.Email));
+			AssertWithMessage.AreEqual(value.FirstName, firstName, nameof(value.FirstName));
+			AssertWithMessage.AreEqual(value.LastName, lastName, nameof(value.LastName));
+			AssertWithMessage.AreEqual(value.PricePerMonth, pricePerMonth, nameof(value.PricePerMonth));
+			AssertWithMessage.AreEqual(value.Racism, racism, nameof(value.Racism));
+			AssertWithMessage.AreEqual(value.RacismSeverity, racismSeverity, nameof(value.RacismSeverity));
+			AssertWithMessage.AreEqual(value.Sexism, sexism, nameof(value.Sexism));
+			AssertWithMessage.AreEqual(value.SexismSeverity, sexismSeverity, nameof(value.SexismSeverity));
+			AssertWithMessage.AreEqual(value.Vulgarity, vulgarity, nameof(value.Vulgarity));
+			AssertWithMessage.AreEqual(value.VulgaritySeverity, vulgaritySeverity, nameof(value.VulgaritySeverity));
 		}
-    }
+
+		[Test]
+		public void Post_BadPassword()
+		{
+			//arrange
+			var model = new UserSignupModel
+			{
+				Password = "1234567"
+			};
+
+			//act
+			var result = _webPageController.Post(model);
+
+			//assert
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
+			var response = result as ObjectResult;
+
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.NotAcceptable, "status code");
+			AssertWithMessage.AreEqual(response.Value.ToString(), "Password must be at least 8 characters", "exception message");
+		}
+
+		[Test]
+		public void Post_GoodPassword()
+		{
+			//arrange
+			var model = new UserSignupModel
+			{
+				Password = "12345678"
+			};
+
+			//act
+			var result = _webPageController.Post(model);
+
+			//assert
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
+		}
+	}
 }

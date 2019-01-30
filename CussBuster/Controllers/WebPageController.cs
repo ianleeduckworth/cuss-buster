@@ -1,4 +1,6 @@
-﻿using CussBuster.Core.ExtensionMethods;
+﻿using CussBuster.Core.Data.Static;
+using CussBuster.Core.Exceptions;
+using CussBuster.Core.ExtensionMethods;
 using CussBuster.Core.Helpers;
 using CussBuster.Core.Models;
 using log4net;
@@ -64,15 +66,18 @@ namespace CussBuster.Controllers
 			{
 				const string user = "api";
 
+				if (signupModel.Password.Length < 8)
+					throw new UserInputException("Password must be at least 8 characters");
+
 				ValidateModel(signupModel);
 
 				var result = _webPageHelper.SignUp(signupModel, user);
 				return Ok(result);
 			}
-			catch (InvalidOperationException ex)
+			catch (UserInputException ex)
 			{
 				_logger.Error(ex.Message);
-				return StatusCode((int)HttpStatusCode.BadRequest, ex.Message);
+				return StatusCode((int)HttpStatusCode.NotAcceptable, ex.Message);
 			}
 			catch(Exception ex)
 			{
@@ -124,13 +129,20 @@ namespace CussBuster.Controllers
 
 		private void ValidateModel<T>(T model) where T : UserModel
 		{
-			if (!ModelState.IsValid)
+			//if this is a free account, we only need to validate the user's email
+			if (model.PricingTierId == (byte)StaticData.StaticPricingTier.Free)
 			{
-				throw new InvalidOperationException(ModelState.GetErrorsText());
+				if (!IsValidEmail(model.EmailAddress))
+					throw new UserInputException("Email address entered is invalid");
+
+				return;
 			}
 
-			if (!IsValidEmail(model.EmailAddress))
-				throw new InvalidOperationException("Email address entered is invalid");
+			//at this point, we know that this is a paid account, so we need to validate everything
+			if (!ModelState.IsValid)
+			{
+				throw new UserInputException(ModelState.GetErrorsText());
+			}
 		}
 
 		private bool IsValidEmail(string email)

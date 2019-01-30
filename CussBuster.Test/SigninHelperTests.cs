@@ -86,7 +86,7 @@ namespace CussBuster.Test
 			var result = _signinHelper.Signin(email, Encoding.ASCII.GetString(enteredPassword));
 
 			//assert
-			Assert.True(result.ApiToken == apiToken);
+			AssertWithMessage.AreEqual(result.ApiToken, apiToken, nameof(result.ApiToken));
 		}
 	}
 }

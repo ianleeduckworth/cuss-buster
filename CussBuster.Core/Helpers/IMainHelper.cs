@@ -9,6 +9,5 @@ namespace CussBuster.Core.Helpers
 		IEnumerable<ReturnModel> FindMatches(string text, User user);
 		User CheckAuthorization(string authToken);
 		bool CheckCharacterLimit(string text);
-		bool CheckUnlockAccount(User user);
 	}
 }

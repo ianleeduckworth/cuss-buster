@@ -13,22 +13,16 @@ namespace CussBuster.Core.Security
 
 		public byte[] GenerateSecurePassword(byte[] password)
 		{
-			var hashedPassword = GenerateHash(password, _salt, _iterations, _length);
-			return hashedPassword;
+			using (var deriveBytes = new Rfc2898DeriveBytes(password, _salt, _iterations))
+			{
+				return deriveBytes.GetBytes(_length);
+			}
 		}
 
 		public bool CompareSecurePasswords(byte[] enteredPassword, byte[] storedPassword)
 		{
 			var secureEnteredPassword = GenerateSecurePassword(enteredPassword);
 			return secureEnteredPassword.SequenceEqual(storedPassword);
-		}
-
-		private byte[] GenerateHash(byte[] password, byte[] salt, int iterations, int length)
-		{
-			using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, iterations))
-			{
-				return deriveBytes.GetBytes(length);
-			}
 		}
 	}
 }

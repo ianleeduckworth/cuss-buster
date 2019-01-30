@@ -58,13 +58,36 @@ namespace CussBuster.Core.DataAccess
 			return user;
 		}
 
-		public void CheckLockAccount(User user)
+		public bool CheckLockAccount(User user)
 		{
-			if (GetCallsThisMonth(user.UserId) > user.CallsPerMonth)
+			//note that this comparison uses greater than or equal to so that on the last call the user has this month, it will complete the call
+			//and then not let them call the API again
+			if (GetCallsThisMonth(user.UserId) >= user.CallsPerMonth)
 			{
 				user.CanCallApi = false;
 				_context.SaveChanges();
+				return false;
 			}
+
+			return true;
+		}
+
+		public bool CheckUnlockAccount(User user)
+		{
+			if (user.CanCallApi)
+				return true;
+
+			var now = DateTime.Now;
+
+			var lastCall = GetLastCallDate(user);
+			if (lastCall.Month != now.Month)
+			{
+				UnlockAccount(user);
+				return true;
+			}
+
+			return false;
+
 		}
 
 		public DateTime GetLastCallDate(User user)
@@ -76,6 +99,12 @@ namespace CussBuster.Core.DataAccess
 		{
 			var now = DateTime.UtcNow;
 			return _context.CallLog.Where(x => x.UserId == userId && x.EventDate.Month == now.Month && x.EventDate.Year == now.Year).Count();
+		}
+
+		public int GetCallsThisMonth(User user)
+		{
+			var now = DateTime.UtcNow;
+			return user.CallLog.Where(x => x.EventDate.Month == now.Month && x.EventDate.Year == now.Year).Count();
 		}
 
 		public User GetUserByApiToken(Guid apiToken)

@@ -55,7 +55,7 @@ namespace CussBuster.Controllers
 				//if the user cannot call the API, check to see if we should unlock the account (if, for example, it's the first of the month).  If we shouldn't, return a bad request
 				if (!user.CanCallApi)
 				{
-					if (!_mainHelper.CheckUnlockAccount(user))
+					if (!_userManager.CheckUnlockAccount(user))
 					{
 						_logger.Error($"User with auth token: {authToken} could not call API.  CanCallApi is false; check monthly limit for user");
 						return StatusCode((int)HttpStatusCode.PaymentRequired, "You have reached your call limit for the month.  Please contact support for more information");

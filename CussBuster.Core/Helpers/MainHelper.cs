@@ -85,19 +85,6 @@ namespace CussBuster.Core.Helpers
 			return true;
 		}
 
-		public bool CheckUnlockAccount(User user)
-		{
-			var now = DateTime.UtcNow;
-			var lastCall = _userManager.GetLastCallDate(user);
-			if (lastCall.Month != now.Month)
-			{
-				_userManager.UnlockAccount(user);
-				return true;
-			}
-
-			return false;
-		}
-
 		private bool CheckForMatch(WordModel cachedWord, string inputWord)
 		{
 			switch (cachedWord.SearchTypeId)

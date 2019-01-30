@@ -65,14 +65,14 @@ namespace CussBuster.Test
 			var model = _webPageHelper.GetUserInfo(apiToken);
 
 			//assert
-			Assert.True(model.AccountLocked == !canCallApi);
-			Assert.True(model.AccountType == "Custom");
-			Assert.True(model.ApiToken == apiToken);
-			Assert.True(model.Email == email);
-			Assert.True(model.FirstName == firstName);
-			Assert.True(model.LastName == lastName);
-			Assert.True(model.CallsPerMonth == callsPerMonth);
-			Assert.True(model.PricePerMonth == pricePerMonth);
+			AssertWithMessage.AreEqual(model.AccountLocked, !canCallApi, nameof(model.AccountLocked));
+			AssertWithMessage.AreEqual(model.AccountType, "Custom", nameof(model.AccountType));
+			AssertWithMessage.AreEqual(model.ApiToken, apiToken, nameof(model.ApiToken));
+			AssertWithMessage.AreEqual(model.Email, email, nameof(model.Email));
+			AssertWithMessage.AreEqual(model.FirstName, firstName, nameof(model.FirstName));
+			AssertWithMessage.AreEqual(model.LastName, lastName, nameof(model.LastName));
+			AssertWithMessage.AreEqual(model.CallsPerMonth, callsPerMonth, nameof(model.CallsPerMonth));
+			AssertWithMessage.AreEqual(model.PricePerMonth, pricePerMonth, nameof(model.PricePerMonth));
 		}
 
 		[Test]
@@ -88,8 +88,8 @@ namespace CussBuster.Test
 			};
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
-			Assert.True(ex.Message == "Credit card information must be provided for any non-free account") ;
+			var ex = Assert.Throws<UserInputException>(() => _webPageHelper.SignUp(signupModel, user));
+			AssertWithMessage.AreEqual(ex.Message, "Credit card information must be provided for any non-free account", "exception message");
 		}
 
 		[Test]
@@ -107,8 +107,8 @@ namespace CussBuster.Test
 			_userManager.Setup(x => x.GetUserByEmail(signupModel.EmailAddress)).Returns(new User());
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
-			Assert.True(ex.Message == $"Account already exists for email address '{signupModel.EmailAddress}'");
+			var ex = Assert.Throws<UserInputException>(() => _webPageHelper.SignUp(signupModel, user));
+			AssertWithMessage.AreEqual(ex.Message, $"Account already exists for email address '{signupModel.EmailAddress}'", "exception message");
 		}
 
 		[Test]
@@ -127,8 +127,8 @@ namespace CussBuster.Test
 			_standardPricingTierManager.Setup(x => x.GetStandardPricingTier(signupModel.PricingTierId)).Returns(default(StandardPricingTier));
 
 			//act / assert
-			var ex = Assert.Throws<InvalidOperationException>(() => _webPageHelper.SignUp(signupModel, user));
-			Assert.True(ex.Message == $"Could not find AccountTypeId {signupModel.PricingTierId}");
+			var ex = Assert.Throws<UserInputException>(() => _webPageHelper.SignUp(signupModel, user));
+			AssertWithMessage.AreEqual(ex.Message, $"Could not find AccountTypeId {signupModel.PricingTierId}", "exception message");
 		}
 
 		[Test]
@@ -227,7 +227,7 @@ namespace CussBuster.Test
 
 			//act / assert
 			var ex = Assert.Throws<UserNotFoundException>(() => _webPageHelper.UpdateUserInfo(apiToken, password, userUpdateModel));
-			Assert.True(ex.Message == $"User could not be found where API token is {apiToken}");
+			AssertWithMessage.AreEqual(ex.Message, $"User could not be found where API token is {apiToken}", "exception message");
 		}
 
 		[Test]

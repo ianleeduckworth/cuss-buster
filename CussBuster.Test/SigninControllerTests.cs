@@ -36,11 +36,11 @@ namespace CussBuster.Test
 			const string lastName = "lastName";
 			const decimal pricePerMonth = 23.45m;
 			const bool racism = true;
-			const int racismSeverity = 5;
+			const byte racismSeverity = 5;
 			const bool sexism = true;
-			const int sexismSeverity = 6;
+			const byte sexismSeverity = 6;
 			const bool vulgarity = true;
-			const int vulgaritySeverity = 7;
+			const byte vulgaritySeverity = 7;
 			int callsPerMonth = 77;
 			int callsThisMonth = 88;
 
@@ -77,30 +77,30 @@ namespace CussBuster.Test
 			var result = _signinController.Post(model);
 
 			//assert
-			Assert.True(result is OkObjectResult);
+			AssertWithMessage.IsOfType(result, typeof(OkObjectResult));
 
 			var response = result as OkObjectResult;
 
-			Assert.True(response.Value is UserReturnModel);
+			AssertWithMessage.IsOfType(response.Value, typeof(UserReturnModel));
 
 			var returnModel = response.Value as UserReturnModel;
 
-			Assert.True(returnModel.AccountLocked == accountLocked);
-			Assert.True(returnModel.AccountType == accountType);
-			Assert.True(returnModel.ApiToken == apiToken);
-			Assert.True(returnModel.CallsPerMonth == callsPerMonth);
-			Assert.True(returnModel.CallsThisMonth == callsThisMonth);
-			Assert.True(returnModel.CreditCardNumber == creditCardNumber);
-			Assert.True(returnModel.Email == email);
-			Assert.True(returnModel.FirstName == firstName);
-			Assert.True(returnModel.LastName == lastName);
-			Assert.True(returnModel.PricePerMonth == pricePerMonth);
-			Assert.True(returnModel.Racism == racism);
-			Assert.True(returnModel.RacismSeverity == racismSeverity);
-			Assert.True(returnModel.Sexism == sexism);
-			Assert.True(returnModel.SexismSeverity == sexismSeverity);
-			Assert.True(returnModel.Vulgarity == vulgarity);
-			Assert.True(returnModel.VulgaritySeverity == vulgaritySeverity);
+			AssertWithMessage.AreEqual(returnModel.AccountLocked, accountLocked, nameof(returnModel.AccountLocked));
+			AssertWithMessage.AreEqual(returnModel.AccountType, accountType, nameof(returnModel.AccountType));
+			AssertWithMessage.AreEqual(returnModel.ApiToken, apiToken, nameof(returnModel.ApiToken));
+			AssertWithMessage.AreEqual(returnModel.CallsPerMonth, callsPerMonth, nameof(returnModel.CallsPerMonth));
+			AssertWithMessage.AreEqual(returnModel.CallsThisMonth, callsThisMonth, nameof(returnModel.CallsThisMonth));
+			AssertWithMessage.AreEqual(returnModel.CreditCardNumber, creditCardNumber, nameof(returnModel.CreditCardNumber));
+			AssertWithMessage.AreEqual(returnModel.Email, email, nameof(returnModel.Email));
+			AssertWithMessage.AreEqual(returnModel.FirstName, firstName, nameof(returnModel.FirstName));
+			AssertWithMessage.AreEqual(returnModel.LastName, lastName, nameof(returnModel.LastName));
+			AssertWithMessage.AreEqual(returnModel.PricePerMonth, pricePerMonth, nameof(returnModel.PricePerMonth));
+			AssertWithMessage.AreEqual(returnModel.Racism, racism, nameof(returnModel.Racism));
+			AssertWithMessage.AreEqual(returnModel.RacismSeverity, racismSeverity, nameof(returnModel.RacismSeverity));
+			AssertWithMessage.AreEqual(returnModel.Sexism, sexism, nameof(returnModel.Sexism));
+			AssertWithMessage.AreEqual(returnModel.SexismSeverity, sexismSeverity, nameof(returnModel.SexismSeverity));
+			AssertWithMessage.AreEqual(returnModel.Vulgarity, vulgarity, nameof(returnModel.Vulgarity));
+			AssertWithMessage.AreEqual(returnModel.VulgaritySeverity, vulgaritySeverity, nameof(returnModel.VulgaritySeverity));
 		}
 
 		[Test]
@@ -123,11 +123,7 @@ namespace CussBuster.Test
 			var result = _signinController.Post(model);
 
 			//assert
-			Assert.True(result is StatusCodeResult);
-
-			var response = result as StatusCodeResult;
-
-			Assert.True(response.StatusCode == (byte)HttpStatusCode.NoContent);
+			AssertWithMessage.IsOfType(result, typeof(BadRequestObjectResult));
 		}
 
 		[Test]
@@ -150,12 +146,12 @@ namespace CussBuster.Test
 			var result = _signinController.Post(model);
 
 			//assert
-			Assert.True(result is ObjectResult);
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
 
 			var response = result as ObjectResult;
 
-			Assert.True(response.StatusCode == (int)HttpStatusCode.Unauthorized);
-			Assert.True(response.Value.ToString() == $"Unauthorized access occurred.  Email: {email}");
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.Unauthorized, "status code");
+			AssertWithMessage.AreEqual(response.Value.ToString(), exceptionText, "exception message");
 		}
 
 		[Test]
@@ -178,22 +174,12 @@ namespace CussBuster.Test
 			var result = _signinController.Post(model);
 
 			//assert
-			Assert.True(result is ObjectResult);
+			AssertWithMessage.IsOfType(result, typeof(ObjectResult));
 
 			var response = result as ObjectResult;
 
-			Assert.True(response.StatusCode == (int)HttpStatusCode.InternalServerError);
-			Assert.True(response.Value.ToString() == $"Unhandled exception occurred while attempting to sign in: {exceptionText}");
-		}
-
-		[Test]
-		public void Options_Ok()
-		{
-			//arrange / act
-			var result = _signinController.Options();
-
-			Assert.True(result is OkResult);
-			Assert.True((result as OkResult).StatusCode == (int)HttpStatusCode.OK);
+			AssertWithMessage.AreEqual(response.StatusCode, (int)HttpStatusCode.InternalServerError, "status code");
+			AssertWithMessage.AreEqual(response.Value.ToString(), $"Unhandled exception occurred while attempting to sign in: {exceptionText}", "exception message");
 		}
 	}
 }
