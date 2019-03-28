@@ -96,11 +96,13 @@ namespace CussBuster.Test
 		public void SignUp_ExistingEmail()
 		{
 			const string user = "user";
+			const string emailAddress = "emailAddress";
 
 			//arrange
 			var signupModel = new UserSignupModel
 			{
 				CreditCardNumber = null,
+				EmailAddress = emailAddress,
 				PricingTierId = (byte)StaticData.StaticPricingTier.Free
 			};
 
