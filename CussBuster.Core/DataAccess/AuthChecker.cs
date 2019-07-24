@@ -15,7 +15,7 @@ namespace CussBuster.Core.DataAccess
 
 		public User CheckToken(Guid token)
 		{
-			return _context.User.FirstOrDefault(x => x.ApiToken == token); ;
+			return _context.User.FirstOrDefault(x => x.ApiToken == token);
 		}
 	}
 }

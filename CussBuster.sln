@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CussBuster", "CussBuster\CussBuster.csproj", "{F618163C-2D39-430A-AE1E-655A85499406}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CussBuster.Core", "CussBuster.Core\CussBuster.Core.csproj", "{DE92AF03-6058-4CAC-A400-80B02307EC68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CussBuster.Core", "CussBuster.Core\CussBuster.Core.csproj", "{DE92AF03-6058-4CAC-A400-80B02307EC68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CussBuster.Test", "CussBuster.Test\CussBuster.Test.csproj", "{CFA763FD-EF3C-4893-B3CF-43AB587F3AE4}"
 EndProject
